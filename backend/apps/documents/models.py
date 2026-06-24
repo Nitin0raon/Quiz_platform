@@ -66,6 +66,11 @@ class UploadedDocument(models.Model):
         default=0,
         help_text="File size in bytes"
     )
+    cloudinary_url = models.URLField(
+        blank=True,
+        null=True,
+        help_text="Cloudinary raw file URL"
+    )
 
     file_name = models.CharField(
         max_length=255,

@@ -1,7 +1,10 @@
 """
 Documents App - Serializers
 """
+from unittest import result
 
+import cloudinary.uploader
+from django.core.files.base import ContentFile
 from rest_framework import serializers
 from django.conf import settings
 from .models import UploadedDocument, DocumentChunk
@@ -41,18 +44,28 @@ class DocumentUploadSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        """Save document with additional metadata from the file."""
-        file = validated_data['file']
+        uploaded_file = validated_data.pop('file')
 
-        # If no title provided, use the filename (without extension)
+        result = cloudinary.uploader.upload(
+            uploaded_file,
+            resource_type="raw",
+            type="upload",
+            access_mode="public",
+            folder="documents"
+        )
+        
+        print(result)
+
         if not validated_data.get('title'):
-            validated_data['title'] = file.name.rsplit('.', 1)[0]
+            validated_data['title'] = uploaded_file.name.rsplit('.', 1)[0]
 
-        validated_data['file_size'] = file.size
-        validated_data['file_name'] = file.name
+        validated_data['file_size'] = uploaded_file.size
+        validated_data['file_name'] = uploaded_file.name
         validated_data['user'] = self.context['request'].user
 
-        return super().create(validated_data)
+        validated_data['cloudinary_url'] = result['secure_url']
+
+        return UploadedDocument.objects.create(**validated_data)
 
 
 class DocumentListSerializer(serializers.ModelSerializer):

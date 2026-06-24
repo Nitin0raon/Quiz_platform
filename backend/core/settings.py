@@ -222,7 +222,7 @@ if CLOUDINARY_URL:
 
     cloudinary.config(from_url=CLOUDINARY_URL)
 
-    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.RawMediaCloudinaryStorage'
     MEDIA_URL = '/media/'
 else:
     MEDIA_URL = os.getenv('MEDIA_URL', '/media/')
@@ -311,17 +311,27 @@ CORS_ALLOW_CREDENTIALS = True  # Allow cookies/auth headers
 # ============================================================
 # Redis is an in-memory database used for caching.
 # Caching speeds up repeated requests dramatically.
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django_redis.cache.RedisCache',
+#         'LOCATION': os.getenv('REDIS_URL', 'redis://localhost:6379/1'),
+#         'OPTIONS': {
+#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+#         },
+#         'TIMEOUT': 300,  # Cache expires in 5 minutes by default
+#     }
+# }
+
 CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': os.getenv('REDIS_URL', 'redis://localhost:6379/1'),
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": os.getenv("REDIS_URL"),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
         'TIMEOUT': 300,  # Cache expires in 5 minutes by default
     }
 }
-
 
 # ============================================================
 # LOGGING CONFIGURATION

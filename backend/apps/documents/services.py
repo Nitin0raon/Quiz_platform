@@ -11,7 +11,11 @@ WHY a service layer?
 - Can be reused across multiple views
 """
 
+import io
 import os
+from urllib import response
+import requests
+from io import BytesIO
 import logging
 import pdfplumber
 from django.conf import settings
@@ -47,13 +51,24 @@ class PDFExtractionService:
             document.status = UploadedDocument.Status.EXTRACTING
             document.save(update_fields=['status'])
 
-            file_path = document.file.path
-            logger.info(f"Starting text extraction for document: {document.id}")
+            file_url = document.cloudinary_url
+
+            logger.info(
+                f"Starting text extraction for document: {document.id}"
+            )
+            logger.info(
+                f"Downloading PDF from Cloudinary: {file_url}"
+            )
+
+            response = requests.get(file_url)
+            response.raise_for_status()
+
+            pdf_file = BytesIO(response.content)
 
             extracted_pages = []
             page_count = 0
 
-            with pdfplumber.open(file_path) as pdf:
+            with pdfplumber.open(pdf_file) as pdf:
                 page_count = len(pdf.pages)
 
                 for page_num, page in enumerate(pdf.pages, start=1):
