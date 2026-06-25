@@ -27,10 +27,12 @@ FAISS (Facebook AI Similarity Search):
 
 import os
 import logging
+import requests
 import pickle
 import numpy as np
 from pathlib import Path
 from django.conf import settings
+import cloudinary.uploader
 
 logger = logging.getLogger('apps.rag')
 
@@ -174,9 +176,36 @@ class FAISSService:
             with open(index_path / 'metadata.pkl', 'wb') as f:
                 pickle.dump(metadata, f)
 
+            # Upload FAISS index
+            faiss_upload = cloudinary.uploader.upload(
+                str(index_path / "index.faiss"),
+                resource_type="raw",
+                folder="faiss_indexes"
+            )
+
+            # Upload metadata
+            metadata_upload = cloudinary.uploader.upload(
+                str(index_path / "metadata.pkl"),
+                resource_type="raw",
+                folder="faiss_indexes"
+            )
+
+            logger.info(f"FAISS uploaded: {faiss_upload['secure_url']}")
+            logger.info(f"Metadata uploaded: {metadata_upload['secure_url']}")
+
+            document.faiss_index_url = faiss_upload["secure_url"]
+            document.faiss_metadata_url = metadata_upload["secure_url"]
+            
             # Update document with index ID
             document.faiss_index_id = index_id
-            document.save(update_fields=['faiss_index_id'])
+
+            document.save(
+                update_fields=[
+                    'faiss_index_id',
+                    'faiss_index_url',
+                    'faiss_metadata_url'
+                ]
+            )
 
             logger.info(
                 f"FAISS index created for document {document.id}. "
@@ -215,8 +244,11 @@ class FAISSService:
             metadata_file = index_path / 'metadata.pkl'
 
             if not index_file.exists():
-                logger.warning(f"FAISS index not found: {index_id}")
-                return []
+                logger.warning(
+                    f"FAISS index missing locally. Restoring from Cloudinary..."
+                )
+
+                self.restore_index(index_id)
 
             # Load the index and metadata
             faiss_index = faiss.read_index(str(index_file))
@@ -267,6 +299,36 @@ class FAISSService:
         # Sort by score (higher is better) and return top_k
         all_results.sort(key=lambda x: x['score'], reverse=True)
         return all_results[:top_k]
+
+
+
+    def restore_index(self, index_id):
+        from apps.documents.models import UploadedDocument
+
+        document = UploadedDocument.objects.get(
+            faiss_index_id=index_id
+        )
+
+        index_path = self._get_index_path(index_id)
+        index_path.mkdir(parents=True, exist_ok=True)
+
+        index_response = requests.get(
+            document.faiss_index_url
+        )
+
+        metadata_response = requests.get(
+            document.faiss_metadata_url
+        )
+
+        with open(index_path / "index.faiss", "wb") as f:
+            f.write(index_response.content)
+
+        with open(index_path / "metadata.pkl", "wb") as f:
+            f.write(metadata_response.content)
+
+        logger.info(
+            f"Restored FAISS index: {index_id}"
+        )
 
     def delete_index(self, index_id: str) -> bool:
         """Delete a FAISS index from disk."""

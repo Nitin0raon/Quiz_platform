@@ -105,6 +105,17 @@ class UploadedDocument(models.Model):
         help_text="ID of the FAISS vector index for this document"
     )
 
+    faiss_index_url = models.URLField(
+        blank=True,
+        null=True,
+        help_text="Cloudinary URL of FAISS index"
+    )
+
+    faiss_metadata_url = models.URLField(
+        blank=True,
+        null=True,
+        help_text="Cloudinary URL of FAISS metadata"
+    )
     error_message = models.TextField(
         blank=True,
         null=True,
