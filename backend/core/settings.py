@@ -82,9 +82,9 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 # Middleware runs on every request/response like a pipeline.
 # CorsMiddleware MUST be before CommonMiddleware.
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', 
-    'corsheaders.middleware.CorsMiddleware',          # CORS - must be high up
+    'whitenoise.middleware.WhiteNoiseMiddleware',         # CORS - must be high up
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
