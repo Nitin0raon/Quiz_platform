@@ -67,13 +67,14 @@ class QuizGenerateView(APIView):
             }, status=status.HTTP_404_NOT_FOUND)
 
         # Check document is processed
-        if not document.extracted_text and document.chunks.count() == 0:
+        # Check document is fully processed
+        if document.status != UploadedDocument.Status.PROCESSED:
             return Response({
                 'success': False,
                 'message': (
-                    f"Document '{document.title}' has not been processed yet. "
+                    f"Document '{document.title}' is still being processed. "
                     f"Current status: {document.status}. "
-                    "Please wait for processing to complete or try reprocessing."
+                    "Please wait until processing is complete."
                 ),
             }, status=status.HTTP_400_BAD_REQUEST)
 
