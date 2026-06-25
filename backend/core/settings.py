@@ -306,6 +306,11 @@ CORS_ALLOWED_ORIGINS = os.getenv(
 CORS_ALLOW_CREDENTIALS = True  # Allow cookies/auth headers
 
 
+CSRF_TRUSTED_ORIGINS = os.getenv(
+    "CSRF_TRUSTED_ORIGINS",
+    "http://localhost:3000,http://127.0.0.1:3000"
+).split(",")
+
 # ============================================================
 # REDIS CACHE SETTINGS
 # ============================================================
@@ -337,8 +342,8 @@ CACHES = {
 # LOGGING CONFIGURATION
 # ============================================================
 # Logging helps you debug and monitor your application.
-LOGS_DIR = BASE_DIR / 'logs'
-LOGS_DIR.mkdir(exist_ok=True)
+# LOGS_DIR = BASE_DIR / 'logs'
+# LOGS_DIR.mkdir(exist_ok=True)
 
 LOGGING = {
     'version': 1,
@@ -358,26 +363,15 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
         },
-        'file': {
-            'class': 'logging.FileHandler',
-            'filename': LOGS_DIR / 'app.log',
-            'formatter': 'verbose',
-        },
-        'error_file': {
-            'class': 'logging.FileHandler',
-            'filename': LOGS_DIR / 'errors.log',
-            'formatter': 'verbose',
-            'level': 'ERROR',
-        },
     },
     'loggers': {
         'django': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,
         },
         'apps': {
-            'handlers': ['console', 'file', 'error_file'],
+            'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': False,
         },
