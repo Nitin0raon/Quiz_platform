@@ -1,109 +1,219 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import {
-  Brain, Zap, FileText, BarChart2, Trophy, Shield,
-  ArrowRight, Check, Star, Sparkles, Target, Clock, 
-  TrendingUp, Users, BookOpen, Award
+  Brain, FileText, Clock, BarChart2, Trophy, Target,
+  ArrowRight, Check, Star, Sparkles, X
 } from 'lucide-react'
+
+const FONTS = (
+  <style>{`
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    .f-display { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
+    .f-body { font-family: 'Inter', sans-serif; }
+    .f-mono { font-family: 'JetBrains Mono', monospace; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .anim-fadeup { animation: fadeUp 0.5s ease forwards; }
+    @media (prefers-reduced-motion: reduce) {
+      .anim-fadeup { animation: none; }
+    }
+  `}</style>
+)
 
 const FEATURES = [
   {
     icon: FileText,
-    title: 'Upload Any PDF',
-    desc: 'Upload your study material, textbooks, or notes. Our system extracts and understands the content automatically.',
+    title: 'Feed it any PDF',
+    desc: 'Textbook chapters, lecture notes, research papers — drop them in and the engine reads and indexes the content in seconds.',
   },
   {
     icon: Brain,
-    title: 'AI Quiz Generation',
-    desc: 'Gemini AI reads your document and generates targeted MCQs at your chosen difficulty level in seconds.',
+    title: 'Targeted question generation',
+    desc: 'Pick a topic and difficulty. The model writes MCQs from the actual material, not generic trivia.',
   },
   {
     icon: Clock,
-    title: 'Timed Practice',
-    desc: 'Set custom time limits to simulate real exam conditions. Track how fast you answer each question.',
+    title: 'Timed, exam-style rounds',
+    desc: 'Set a clock per question or per set to build real exam pressure instead of untimed flashcard drilling.',
   },
   {
     icon: BarChart2,
-    title: 'Deep Analytics',
-    desc: 'Track accuracy trends, identify weak topics, and measure improvement over time with rich charts.',
+    title: 'See where you actually lose points',
+    desc: 'Every attempt is logged by topic, so weak areas show up as a pattern, not a guess.',
   },
   {
     icon: Trophy,
-    title: 'Leaderboard',
-    desc: 'Compete with other learners, earn points for every correct answer, and climb the global rankings.',
+    title: 'Global leaderboard',
+    desc: 'Points for accuracy and speed. Compare your rank against everyone studying the same material.',
   },
   {
     icon: Target,
-    title: 'Smart Retrieval',
-    desc: 'RAG pipeline finds the most relevant sections of your document for each quiz topic automatically.',
+    title: 'Retrieval that finds the right passage',
+    desc: 'A retrieval pipeline pulls the exact section relevant to your chosen topic before writing a single question.',
   },
 ]
 
 const STEPS = [
-  { step: '01', title: 'Upload your PDF', desc: 'Drop in any study material — textbooks, notes, articles.' },
-  { step: '02', title: 'Choose a topic', desc: 'Tell the AI what topic to focus on and pick your difficulty.' },
-  { step: '03', title: 'Take the quiz', desc: 'Answer AI-generated MCQs with a timer if you want.' },
-  { step: '04', title: 'Review & improve', desc: 'See detailed explanations and track your progress over time.' },
+  { mark: 'A', title: 'Upload your PDF', desc: 'Textbooks, notes, articles — any document you\u2019re studying from.' },
+  { mark: 'B', title: 'Set the topic & level', desc: 'Tell it what to focus on and how hard to make it.' },
+  { mark: 'C', title: 'Sit the quiz', desc: 'Answer AI-written MCQs, timer on if you want the pressure.' },
+  { mark: 'D', title: 'Read the breakdown', desc: 'Every answer comes with an explanation and a running accuracy trend.' },
 ]
 
 const STATS = [
-  { value: '10x', label: 'Faster than manual flashcards' },
-  { value: '94%', label: 'Users improved their scores' },
-  { value: '50K+', label: 'Quizzes generated' },
-  { value: '200+', label: 'Topics supported' },
+  { value: '10×', label: 'faster than manual flashcards' },
+  { value: '94%', label: 'of users raised their score' },
+  { value: '50K+', label: 'quizzes generated' },
+  { value: '200+', label: 'topics covered' },
 ]
 
-const TESTIMONIALS = [
+const RESULTS = [
   {
     name: 'Priya S.',
-    role: 'Medical Student',
-    text: 'I uploaded my anatomy notes and got 10 perfect MCQs in 15 seconds. This is insane.',
+    role: 'Medical student',
+    text: 'I uploaded my anatomy notes and had ten solid MCQs back in fifteen seconds. Cut my prep time in half.',
     rating: 5,
   },
   {
     name: 'Rahul M.',
-    role: 'Software Engineer',
-    text: 'Used it to prep for system design interviews. The AI actually understands context, not just keywords.',
+    role: 'Software engineer',
+    text: 'Used it for system design interview prep. It actually reasons about the document instead of matching keywords.',
     rating: 5,
   },
   {
     name: 'Ananya K.',
-    role: 'UPSC Aspirant',
-    text: 'Finally a tool that turns my 200-page PDFs into focused practice. My accuracy went from 60% to 84%.',
+    role: 'UPSC aspirant',
+    text: 'It turned a 200-page PDF into focused practice sets. My accuracy went from 60% to 84% in three weeks.',
     rating: 5,
   },
 ]
 
+// ── Live quiz demo used in the hero ──────────────────────────
+const DEMO_QUESTIONS = [
+  {
+    q: 'What does RAG stand for in this context?',
+    options: [
+      { label: 'A', text: 'Random Answer Generation', correct: false },
+      { label: 'B', text: 'Retrieval-Augmented Generation', correct: true },
+      { label: 'C', text: 'Ranked Answer Grading', correct: false },
+      { label: 'D', text: 'Recursive Answer Graph', correct: false },
+    ],
+  },
+  {
+    q: 'Mitochondria are best described as the:',
+    options: [
+      { label: 'A', text: 'Cell\u2019s storage unit', correct: false },
+      { label: 'B', text: 'Cell\u2019s powerhouse', correct: true },
+      { label: 'C', text: 'Cell\u2019s messenger', correct: false },
+      { label: 'D', text: 'Cell\u2019s boundary wall', correct: false },
+    ],
+  },
+  {
+    q: 'In a binary search tree, the left child is always:',
+    options: [
+      { label: 'A', text: 'Greater than the parent', correct: false },
+      { label: 'B', text: 'Equal to the parent', correct: false },
+      { label: 'C', text: 'Less than the parent', correct: true },
+      { label: 'D', text: 'Unrelated to the parent', correct: false },
+    ],
+  },
+]
+
+function LiveQuizCard() {
+  const [index, setIndex] = useState(0)
+  const [revealed, setRevealed] = useState(false)
+
+  useEffect(() => {
+    const revealTimer = setTimeout(() => setRevealed(true), 1400)
+    const nextTimer = setTimeout(() => {
+      setRevealed(false)
+      setIndex((i) => (i + 1) % DEMO_QUESTIONS.length)
+    }, 4200)
+    return () => {
+      clearTimeout(revealTimer)
+      clearTimeout(nextTimer)
+    }
+  }, [index])
+
+  const current = DEMO_QUESTIONS[index]
+
+  return (
+    <div className="w-full max-w-md bg-[#14161B] border border-[#24272E] rounded-2xl p-6 shadow-2xl shadow-black/40">
+      <div className="flex items-center justify-between mb-5">
+        <span className="f-mono text-[11px] uppercase tracking-wider text-[#8B8F97]">
+          Question {index + 1} / {DEMO_QUESTIONS.length}
+        </span>
+        <span className="f-mono text-[11px] px-2 py-1 rounded bg-[#F5B942]/10 text-[#F5B942] border border-[#F5B942]/20">
+          generated in 2.4s
+        </span>
+      </div>
+
+      <p key={index} className="f-body text-[#ECEAE6] text-base leading-snug mb-5 anim-fadeup min-h-[3rem]">
+        {current.q}
+      </p>
+
+      <div className="space-y-2.5">
+        {current.options.map((opt) => {
+          const showCorrect = revealed && opt.correct
+          return (
+            <div
+              key={opt.label}
+              className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg border text-sm transition-colors duration-300 ${
+                showCorrect
+                  ? 'border-[#5EEAD4]/50 bg-[#5EEAD4]/[0.08]'
+                  : 'border-[#24272E] bg-[#0A0B0D]/40'
+              }`}
+            >
+              <span
+                className={`f-mono w-6 h-6 flex items-center justify-center rounded-full text-[11px] font-medium shrink-0 border transition-colors duration-300 ${
+                  showCorrect
+                    ? 'border-[#5EEAD4] text-[#5EEAD4]'
+                    : 'border-[#3A3E46] text-[#8B8F97]'
+                }`}
+              >
+                {opt.label}
+              </span>
+              <span className={`f-body flex-1 ${showCorrect ? 'text-[#ECEAE6]' : 'text-[#8B8F97]'}`}>
+                {opt.text}
+              </span>
+              {showCorrect && <Check className="w-4 h-4 text-[#5EEAD4] shrink-0" strokeWidth={2.5} />}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 function Navbar() {
   const { isAuthenticated } = useAuth()
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/90 backdrop-blur-md border-b border-zinc-800">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0A0B0D]/90 backdrop-blur-md border-b border-[#24272E]">
       <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-lime-400 rounded-lg flex items-center justify-center shadow-sm">
-            <Brain className="w-5 h-5 text-[#0a0a0a]" strokeWidth={2.5} />
+          <div className="w-8 h-8 rounded-full border-2 border-[#F5B942] flex items-center justify-center">
+            <span className="f-mono text-[#F5B942] text-xs font-semibold">B</span>
           </div>
-          <span className="font-display font-bold text-white text-lg tracking-tight">
-            Quiz<span className="text-lime-400">AI</span>
+          <span className="f-display font-semibold text-[#ECEAE6] text-lg">
+            Quiz<span className="text-[#F5B942]">AI</span>
           </span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-400">
-          <a href="#features" className="hover:text-lime-400 transition-colors">Features</a>
-          <a href="#how-it-works" className="hover:text-lime-400 transition-colors">How it works</a>
-          <a href="#pricing" className="hover:text-lime-400 transition-colors">Pricing</a>
+        <div className="hidden md:flex items-center gap-8 f-mono text-[13px] text-[#8B8F97]">
+          <a href="#features" className="hover:text-[#F5B942] transition-colors">features</a>
+          <a href="#how-it-works" className="hover:text-[#F5B942] transition-colors">how_it_works</a>
+          <a href="#results" className="hover:text-[#F5B942] transition-colors">results</a>
         </div>
 
         <div className="flex items-center gap-4">
           {isAuthenticated ? (
-            <Link to="/home" className="px-4 py-2 bg-lime-400 hover:bg-lime-500 text-[#0a0a0a] font-semibold rounded-md flex items-center gap-2 transition-colors text-sm">
-              Go to App <ArrowRight className="w-4 h-4" />
+            <Link to="/home" className="px-4 py-2 bg-[#F5B942] hover:bg-[#f0aa26] text-[#0A0B0D] f-body font-semibold rounded-md flex items-center gap-2 transition-colors text-sm">
+              Go to app <ArrowRight className="w-4 h-4" />
             </Link>
           ) : (
             <>
-              <Link to="/login" className="text-zinc-300 hover:text-white text-sm font-medium">Sign in</Link>
-              <Link to="/register" className="px-4 py-2 bg-lime-400 hover:bg-lime-500 text-[#0a0a0a] font-semibold rounded-md flex items-center gap-2 transition-colors text-sm">
+              <Link to="/login" className="text-[#ECEAE6]/80 hover:text-[#ECEAE6] text-sm f-body font-medium">Sign in</Link>
+              <Link to="/register" className="px-4 py-2 bg-[#F5B942] hover:bg-[#f0aa26] text-[#0A0B0D] f-body font-semibold rounded-md transition-colors text-sm">
                 Get started
               </Link>
             </>
@@ -116,85 +226,93 @@ function Navbar() {
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-zinc-300 font-sans selection:bg-lime-400 selection:text-black">
+    <div className="min-h-screen bg-[#0A0B0D] text-[#8B8F97] f-body selection:bg-[#F5B942] selection:text-[#0A0B0D]">
+      {FONTS}
       <Navbar />
 
       {/* ── HERO ─────────────────────────────────────────── */}
-      <section className="pt-40 pb-32 px-5 relative overflow-hidden bg-[#0a0a0a]">
-        {/* Subtle grid background pattern */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(#a3e635 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+      <section className="pt-40 pb-28 px-5 relative overflow-hidden">
+        <div
+          className="absolute inset-0 opacity-[0.04] pointer-events-none"
+          style={{ backgroundImage: 'radial-gradient(#F5B942 1px, transparent 1px)', backgroundSize: '36px 36px' }}
+        />
 
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-lime-400 text-xs font-medium mb-8 uppercase tracking-wider">
-            <Sparkles className="w-3.5 h-3.5" />
-            AI-powered quiz generation
+        <div className="max-w-6xl mx-auto relative z-10 grid lg:grid-cols-2 gap-14 items-center">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#14161B] border border-[#24272E] text-[#F5B942] f-mono text-[11px] mb-7 uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5" />
+              pdf_in.study_out()
+            </div>
+
+            <h1 className="f-display text-4xl md:text-[3.25rem] font-semibold text-[#ECEAE6] leading-[1.08] mb-6">
+              Your PDF just became
+              <br />
+              <span className="text-[#F5B942]">your hardest quiz.</span>
+            </h1>
+
+            <p className="f-body text-base md:text-lg text-[#8B8F97] max-w-md mb-9 leading-relaxed">
+              Upload any document. Choose a topic and difficulty. Get exam-grade MCQs
+              with explanations, timers, and analytics that show exactly where you're weak.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 mb-9">
+              <Link to="/register" className="px-7 py-3.5 bg-[#F5B942] hover:bg-[#f0aa26] text-[#0A0B0D] f-body font-semibold rounded-md flex items-center justify-center gap-2 transition-colors text-base">
+                Start for free <ArrowRight className="w-4 h-4" />
+              </Link>
+              <a href="#how-it-works" className="px-7 py-3.5 bg-transparent hover:bg-[#14161B] border border-[#24272E] text-[#ECEAE6] f-body font-medium rounded-md flex items-center justify-center transition-colors text-base">
+                See how it works
+              </a>
+            </div>
+
+            <div className="flex items-center gap-6 f-mono text-[12px] text-[#8B8F97] flex-wrap">
+              {['no card required', 'free tier', 'ready in 2 min'].map((t) => (
+                <span key={t} className="flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5 text-[#5EEAD4]" strokeWidth={3} />
+                  {t}
+                </span>
+              ))}
+            </div>
           </div>
 
-          <h1 className="font-display text-4xl md:text-6xl font-bold text-white leading-tight mb-6">
-            Turn any PDF into a{' '}
-            <span className="text-lime-400 relative">
-              smart quiz
-            </span>
-            <br />in seconds.
-          </h1>
-
-          <p className="text-base md:text-lg text-zinc-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Upload your study material. Choose a topic. Let AI generate targeted MCQ quizzes
-            with explanations. Track your progress and ace every exam.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10">
-            <Link to="/register" className="px-8 py-3.5 bg-lime-400 hover:bg-lime-500 text-[#0a0a0a] font-semibold rounded-md flex items-center justify-center gap-2 transition-colors text-base">
-              Start for free <ArrowRight className="w-4 h-4" />
-            </Link>
-            <a href="#how-it-works" className="px-8 py-3.5 bg-[#111111] hover:bg-zinc-800 border border-zinc-800 text-white font-semibold rounded-md flex items-center justify-center transition-colors text-base">
-              See how it works
-            </a>
-          </div>
-
-          <div className="flex items-center justify-center gap-6 text-sm text-zinc-500 flex-wrap">
-            {['No credit card required', 'Free forever plan', 'Setup in 2 minutes'].map((t) => (
-              <span key={t} className="flex items-center gap-1.5">
-                <Check className="w-4 h-4 text-lime-400" strokeWidth={3} />
-                {t}
-              </span>
-            ))}
+          <div className="flex justify-center lg:justify-end">
+            <LiveQuizCard />
           </div>
         </div>
       </section>
 
       {/* ── STATS ────────────────────────────────────────── */}
-      <section className="py-16 bg-[#111111] border-y border-zinc-800">
+      <section className="py-14 bg-[#0E1013] border-y border-[#24272E]">
         <div className="max-w-5xl mx-auto px-5 grid grid-cols-2 md:grid-cols-4 gap-8">
           {STATS.map((s) => (
-            <div key={s.label} className="text-center">
-              <p className="font-display text-3xl font-bold text-lime-400 mb-1">{s.value}</p>
-              <p className="text-zinc-400 text-sm">{s.label}</p>
+            <div key={s.label} className="text-center md:border-l md:border-[#24272E] md:first:border-l-0 md:pl-6 md:first:pl-0">
+              <p className="f-mono text-3xl font-semibold text-[#F5B942] mb-1">{s.value}</p>
+              <p className="f-body text-[#8B8F97] text-sm">{s.label}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* ── FEATURES ─────────────────────────────────────── */}
-      <section id="features" className="py-24 px-5 bg-[#0a0a0a]">
+      <section id="features" className="py-24 px-5">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="font-display text-3xl md:text-4xl font-bold text-white mb-4">
-              Our Services
+          <div className="mb-16 max-w-2xl">
+            <p className="f-mono text-[11px] uppercase tracking-wider text-[#F5B942] mb-3">what it does</p>
+            <h2 className="f-display text-3xl md:text-4xl font-semibold text-[#ECEAE6] mb-4">
+              Built to study from, not just around
             </h2>
-            <p className="text-zinc-400 max-w-2xl mx-auto text-base">
-              Transform unstructured study material into a powerful learning experience with our advanced features.
+            <p className="text-[#8B8F97] text-base leading-relaxed">
+              Every feature exists to close the gap between reading material and being tested on it.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-5">
             {FEATURES.map((f) => (
-              <div key={f.title} className="bg-[#111111] p-8 rounded-xl border border-zinc-800 hover:border-lime-400/30 transition-colors group">
-                <div className="w-12 h-12 rounded-lg bg-lime-400/10 flex items-center justify-center mb-6 group-hover:bg-lime-400/20 transition-colors">
-                  <f.icon className="w-5 h-5 text-lime-400" />
+              <div key={f.title} className="bg-[#14161B] p-7 rounded-xl border border-[#24272E] hover:border-[#F5B942]/30 transition-colors group">
+                <div className="w-10 h-10 rounded-lg border border-[#F5B942]/30 bg-[#F5B942]/[0.06] flex items-center justify-center mb-6 group-hover:bg-[#F5B942]/[0.12] transition-colors">
+                  <f.icon className="w-4.5 h-4.5 text-[#F5B942]" />
                 </div>
-                <h3 className="font-display font-semibold text-lg text-white mb-3">{f.title}</h3>
-                <p className="text-zinc-400 leading-relaxed text-sm">{f.desc}</p>
+                <h3 className="f-display font-semibold text-base text-[#ECEAE6] mb-2.5">{f.title}</h3>
+                <p className="text-[#8B8F97] leading-relaxed text-sm">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -202,58 +320,58 @@ export default function LandingPage() {
       </section>
 
       {/* ── HOW IT WORKS ─────────────────────────────────── */}
-      <section id="how-it-works" className="py-24 px-5 bg-[#111111] border-y border-zinc-800">
+      <section id="how-it-works" className="py-24 px-5 bg-[#0E1013] border-y border-[#24272E]">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="font-display text-3xl md:text-4xl font-bold text-white mb-4">
-              From PDF to quiz in 4 steps
+            <p className="f-mono text-[11px] uppercase tracking-wider text-[#F5B942] mb-3">the flow</p>
+            <h2 className="f-display text-3xl md:text-4xl font-semibold text-[#ECEAE6]">
+              From document to graded answer sheet
             </h2>
           </div>
 
           <div className="grid md:grid-cols-4 gap-8 relative">
-            {/* Connector line */}
-            <div className="hidden md:block absolute top-8 left-[12.5%] right-[12.5%] h-[1px] bg-zinc-800 z-0" />
-            
+            <div className="hidden md:block absolute top-7 left-[12.5%] right-[12.5%] h-[1px] bg-[#24272E] z-0" />
             {STEPS.map((s) => (
-              <div key={s.step} className="relative z-10 bg-[#0a0a0a] p-6 rounded-xl border border-zinc-800 text-center">
-                <div className="w-16 h-16 rounded-lg bg-[#111111] border border-lime-400/30 flex items-center justify-center mx-auto mb-5">
-                  <span className="font-display font-bold text-lime-400 text-lg">{s.step}</span>
+              <div key={s.mark} className="relative z-10 bg-[#0A0B0D] p-6 rounded-xl border border-[#24272E] text-center">
+                <div className="w-14 h-14 rounded-full bg-[#14161B] border-2 border-[#F5B942] flex items-center justify-center mx-auto mb-5">
+                  <span className="f-mono font-semibold text-[#F5B942] text-lg">{s.mark}</span>
                 </div>
-                <h3 className="font-display font-semibold text-white mb-2 text-base">{s.title}</h3>
-                <p className="text-sm text-zinc-400 leading-relaxed">{s.desc}</p>
+                <h3 className="f-display font-semibold text-[#ECEAE6] mb-2 text-base">{s.title}</h3>
+                <p className="text-sm text-[#8B8F97] leading-relaxed">{s.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── TESTIMONIALS ─────────────────────────────────── */}
-      <section className="py-24 px-5 bg-[#0a0a0a]">
+      {/* ── RESULTS ──────────────────────────────────────── */}
+      <section id="results" className="py-24 px-5">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="font-display text-3xl md:text-4xl font-bold text-white">
-              Why Choose QuizAI?
+          <div className="mb-16 max-w-2xl">
+            <p className="f-mono text-[11px] uppercase tracking-wider text-[#F5B942] mb-3">real scores</p>
+            <h2 className="f-display text-3xl md:text-4xl font-semibold text-[#ECEAE6]">
+              What changed after switching
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map((t) => (
-              <div key={t.name} className="bg-[#111111] p-8 rounded-xl border border-zinc-800 flex flex-col justify-between">
+          <div className="grid md:grid-cols-3 gap-5">
+            {RESULTS.map((t) => (
+              <div key={t.name} className="bg-[#14161B] p-7 rounded-xl border border-[#24272E] flex flex-col justify-between">
                 <div>
-                  <div className="flex gap-1 mb-6">
+                  <div className="flex gap-1 mb-5">
                     {[...Array(t.rating)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 text-lime-400 fill-lime-400" />
+                      <Star key={i} className="w-3.5 h-3.5 text-[#F5B942] fill-[#F5B942]" />
                     ))}
                   </div>
-                  <p className="text-zinc-300 leading-relaxed mb-8 text-sm">"{t.text}"</p>
+                  <p className="text-[#ECEAE6] leading-relaxed mb-7 text-sm">{t.text}</p>
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center">
-                    <span className="font-bold text-white text-sm">{t.name[0]}</span>
+                <div className="flex items-center gap-3 pt-5 border-t border-[#24272E]">
+                  <div className="w-9 h-9 rounded-full bg-[#0A0B0D] border border-[#24272E] flex items-center justify-center">
+                    <span className="f-mono font-medium text-[#ECEAE6] text-xs">{t.name[0]}</span>
                   </div>
                   <div>
-                    <p className="font-semibold text-white text-sm">{t.name}</p>
-                    <p className="text-xs text-lime-400 mt-0.5">{t.role}</p>
+                    <p className="f-body font-medium text-[#ECEAE6] text-sm">{t.name}</p>
+                    <p className="f-mono text-[11px] text-[#F5B942] mt-0.5">{t.role}</p>
                   </div>
                 </div>
               </div>
@@ -263,47 +381,42 @@ export default function LandingPage() {
       </section>
 
       {/* ── CTA ──────────────────────────────────────────── */}
-      <section className="py-24 px-5 bg-[#111111] border-t border-zinc-800 text-center">
-        <div className="max-w-3xl mx-auto">
-          <div className="w-14 h-14 bg-lime-400 rounded-lg flex items-center justify-center mx-auto mb-8">
-            <Zap className="w-6 h-6 text-[#0a0a0a]" />
-          </div>
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-white mb-6 leading-tight">
-            Let us Bring your Ideas to Life in the Digital World.
+      <section className="py-24 px-5 bg-[#0E1013] border-t border-[#24272E] text-center">
+        <div className="max-w-2xl mx-auto">
+          <p className="f-mono text-[11px] uppercase tracking-wider text-[#F5B942] mb-5">no more re-reading the same chapter</p>
+          <h2 className="f-display text-3xl md:text-4xl font-semibold text-[#ECEAE6] mb-6 leading-tight">
+            Upload one PDF. Find out what you don't know yet.
           </h2>
-          <p className="text-zinc-400 mb-10 text-base max-w-xl mx-auto">
-            Join thousands of students and professionals who use QuizAI to prepare faster and score higher.
+          <p className="text-[#8B8F97] mb-10 text-base max-w-lg mx-auto">
+            Free to start, no card needed. Your first quiz is ready before your coffee is.
           </p>
-          <div className="flex justify-center">
-             <Link to="/register" className="px-8 py-3.5 bg-lime-400 hover:bg-lime-500 text-[#0a0a0a] font-bold rounded-md transition-colors text-base">
-               Start Project
-             </Link>
-          </div>
+          <Link to="/register" className="inline-flex px-8 py-3.5 bg-[#F5B942] hover:bg-[#f0aa26] text-[#0A0B0D] f-body font-semibold rounded-md transition-colors text-base">
+            Start your first quiz <ArrowRight className="w-4 h-4 ml-2" />
+          </Link>
         </div>
       </section>
 
       {/* ── FOOTER ───────────────────────────────────────── */}
-      <footer className="bg-[#0a0a0a] border-t border-zinc-800 py-10 px-5">
+      <footer className="border-t border-[#24272E] py-10 px-5">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-lime-400 rounded flex items-center justify-center">
-              <Brain className="w-4 h-4 text-[#0a0a0a]" strokeWidth={2.5} />
+            <div className="w-7 h-7 rounded-full border-2 border-[#F5B942] flex items-center justify-center">
+              <span className="f-mono text-[#F5B942] text-[10px] font-semibold">B</span>
             </div>
-            <span className="font-display font-bold text-white text-lg">
-              Quiz<span className="text-lime-400">AI</span>
+            <span className="f-display font-semibold text-[#ECEAE6] text-base">
+              Quiz<span className="text-[#F5B942]">AI</span>
             </span>
           </div>
-          
-          <div className="flex flex-wrap justify-center gap-8 text-sm text-zinc-400">
-            <a href="#" className="hover:text-lime-400 transition-colors">Home</a>
-            <a href="#features" className="hover:text-lime-400 transition-colors">Services</a>
-            <a href="#how-it-works" className="hover:text-lime-400 transition-colors">Process</a>
-            <a href="#pricing" className="hover:text-lime-400 transition-colors">About</a>
-            <a href="#" className="hover:text-lime-400 transition-colors">Contact</a>
+
+          <div className="flex flex-wrap justify-center gap-8 f-mono text-[12px] text-[#8B8F97]">
+            <a href="#features" className="hover:text-[#F5B942] transition-colors">features</a>
+            <a href="#how-it-works" className="hover:text-[#F5B942] transition-colors">how_it_works</a>
+            <a href="#results" className="hover:text-[#F5B942] transition-colors">results</a>
+            <a href="#" className="hover:text-[#F5B942] transition-colors">contact</a>
           </div>
 
-          <div className="flex items-center gap-4 text-xs text-zinc-500">
-             © 2026 QuizAI. All rights reserved.
+          <div className="f-mono text-[11px] text-[#8B8F97]/70">
+            © 2026 quizai
           </div>
         </div>
       </footer>

@@ -1,8 +1,17 @@
 import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { Brain, Eye, EyeOff, ArrowRight } from 'lucide-react'
+import { Eye, EyeOff, ArrowRight } from 'lucide-react'
 import Spinner from '../../components/common/Spinner'
+
+const FONTS = (
+  <style>{`
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    .f-display { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
+    .f-body { font-family: 'Inter', sans-serif; }
+    .f-mono { font-family: 'JetBrains Mono', monospace; }
+  `}</style>
+)
 
 export default function LoginPage() {
   const { login, loading } = useAuth()
@@ -39,49 +48,53 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] px-4 font-sans selection:bg-lime-400 selection:text-black">
-      {/* Background Subtle Effects */}
+    <div className="min-h-screen flex items-center justify-center bg-[#0A0B0D] px-4 f-body selection:bg-[#F5B942] selection:text-[#0A0B0D] relative">
+      {FONTS}
+
+      {/* Background effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-lime-400/5 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-zinc-600/5 rounded-full blur-[120px]" />
-        {/* Subtle grid to match the tech agency vibe */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(#a3e635 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-[#F5B942]/[0.04] rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-[#5EEAD4]/[0.03] rounded-full blur-[120px]" />
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{ backgroundImage: 'radial-gradient(#F5B942 1px, transparent 1px)', backgroundSize: '36px 36px' }}
+        />
       </div>
 
-      {/* Home Button */}
+      {/* Home button */}
       <div className="absolute top-6 left-6 z-20">
         <Link
           to="/landingPage"
-          className="flex items-center gap-2 px-4 py-2 bg-[#111111] border border-zinc-800 rounded-lg shadow-sm hover:border-lime-400/50 hover:text-lime-400 transition-colors duration-200 text-zinc-400 font-medium text-sm"
+          className="flex items-center gap-2 px-4 py-2 bg-[#14161B] border border-[#24272E] rounded-lg hover:border-[#F5B942]/50 hover:text-[#F5B942] transition-colors duration-200 text-[#8B8F97] f-mono text-[13px]"
         >
-          ← Home
+          ← home
         </Link>
       </div>
 
-      {/* Login Card */}
+      {/* Login card */}
       <div className="relative w-full max-w-md z-10">
-        <div className="bg-[#111111] border border-zinc-800 shadow-2xl rounded-2xl p-8 sm:p-10">
+        <div className="bg-[#14161B] border border-[#24272E] shadow-2xl shadow-black/40 rounded-2xl p-8 sm:p-10">
 
           {/* Logo */}
           <div className="flex flex-col items-center mb-8">
-            <div className="w-14 h-14 rounded-xl bg-lime-400 flex items-center justify-center shadow-lg mb-5">
-              <Brain className="w-7 h-7 text-[#0a0a0a]" strokeWidth={2.5} />
+            <div className="w-14 h-14 rounded-full border-2 border-[#F5B942] flex items-center justify-center mb-5">
+              <span className="f-mono text-[#F5B942] text-xl font-semibold">B</span>
             </div>
 
-            <h1 className="text-3xl font-display font-bold text-white">
-              Welcome Back
+            <h1 className="text-3xl f-display font-semibold text-[#ECEAE6]">
+              Welcome back
             </h1>
 
-            <p className="text-zinc-400 text-sm mt-2 text-center">
-              Sign in to continue your learning journey
+            <p className="text-[#8B8F97] text-sm mt-2 text-center f-body">
+              Sign in to pick up where your last quiz left off
             </p>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-2">
-                Email Address
+              <label className="block f-mono text-[11px] uppercase tracking-wider text-[#8B8F97] mb-2">
+                Email address
               </label>
 
               <input
@@ -90,15 +103,15 @@ export default function LoginPage() {
                 value={form.email}
                 onChange={handleChange}
                 placeholder="you@example.com"
-                className={`w-full px-4 py-3 rounded-lg border bg-[#0a0a0a] text-white placeholder-zinc-600 focus:outline-none focus:ring-1 transition-colors ${
+                className={`w-full px-4 py-3 rounded-lg border bg-[#0A0B0D] text-[#ECEAE6] placeholder-[#4A4E56] f-body focus:outline-none focus:ring-1 transition-colors ${
                   errors.email
                     ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-                    : 'border-zinc-800 focus:border-lime-400 focus:ring-lime-400'
+                    : 'border-[#24272E] focus:border-[#F5B942] focus:ring-[#F5B942]'
                 }`}
               />
 
               {errors.email && (
-                <p className="text-red-500 text-xs mt-1.5 font-medium">
+                <p className="text-red-400 text-xs mt-1.5 f-mono">
                   {errors.email}
                 </p>
               )}
@@ -106,15 +119,15 @@ export default function LoginPage() {
 
             <div>
               <div className="flex justify-between items-center mb-2">
-                <label className="text-sm font-medium text-zinc-300">
+                <label className="f-mono text-[11px] uppercase tracking-wider text-[#8B8F97]">
                   Password
                 </label>
 
                 <Link
                   to="/forgot-password"
-                  className="text-sm text-zinc-500 hover:text-lime-400 transition-colors"
+                  className="text-[12px] f-mono text-[#8B8F97] hover:text-[#F5B942] transition-colors"
                 >
-                  Forgot Password?
+                  forgot?
                 </Link>
               </div>
 
@@ -125,28 +138,24 @@ export default function LoginPage() {
                   value={form.password}
                   onChange={handleChange}
                   placeholder="••••••••"
-                  className={`w-full px-4 py-3 pr-12 rounded-lg border bg-[#0a0a0a] text-white placeholder-zinc-600 focus:outline-none focus:ring-1 transition-colors ${
+                  className={`w-full px-4 py-3 pr-12 rounded-lg border bg-[#0A0B0D] text-[#ECEAE6] placeholder-[#4A4E56] f-body focus:outline-none focus:ring-1 transition-colors ${
                     errors.password
                       ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-                      : 'border-zinc-800 focus:border-lime-400 focus:ring-lime-400'
+                      : 'border-[#24272E] focus:border-[#F5B942] focus:ring-[#F5B942]'
                   }`}
                 />
 
                 <button
                   type="button"
                   onClick={() => setShowPw(!showPw)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8B8F97] hover:text-[#ECEAE6] transition-colors"
                 >
-                  {showPw ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
+                  {showPw ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
 
               {errors.password && (
-                <p className="text-red-500 text-xs mt-1.5 font-medium">
+                <p className="text-red-400 text-xs mt-1.5 f-mono">
                   {errors.password}
                 </p>
               )}
@@ -155,13 +164,13 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 mt-2 rounded-lg bg-lime-400 hover:bg-lime-500 disabled:opacity-70 disabled:hover:bg-lime-400 text-[#0a0a0a] font-bold transition-colors flex items-center justify-center gap-2 shadow-[0_0_15px_-3px_rgba(163,230,53,0.3)]"
+              className="w-full py-3.5 mt-2 rounded-lg bg-[#F5B942] hover:bg-[#f0aa26] disabled:opacity-70 disabled:hover:bg-[#F5B942] text-[#0A0B0D] f-body font-semibold transition-colors flex items-center justify-center gap-2 shadow-[0_0_15px_-3px_rgba(245,185,66,0.35)]"
             >
               {loading ? (
-                <Spinner size="sm" color="text-[#0a0a0a]" />
+                <Spinner size="sm" color="text-[#0A0B0D]" />
               ) : (
                 <>
-                  Sign In
+                  Sign in
                   <ArrowRight className="w-4 h-4" strokeWidth={2.5} />
                 </>
               )}
@@ -170,21 +179,21 @@ export default function LoginPage() {
 
           {/* Signup */}
           <div className="mt-8 text-center">
-            <p className="text-zinc-400 text-sm">
+            <p className="text-[#8B8F97] text-sm f-body">
               Don't have an account?{' '}
               <Link
                 to="/register"
-                className="text-lime-400 font-semibold hover:text-lime-300 transition-colors"
+                className="text-[#F5B942] font-semibold hover:text-[#f0aa26] transition-colors"
               >
-                Create Account
+                Create one
               </Link>
             </p>
           </div>
 
           {/* Footer */}
-          <div className="mt-8 border-t border-zinc-800 pt-6">
-            <p className="text-center text-xs text-zinc-600">
-              By signing in, you agree to our Terms and Privacy Policy.
+          <div className="mt-8 border-t border-[#24272E] pt-6">
+            <p className="text-center f-mono text-[11px] text-[#8B8F97]/70">
+              by signing in you agree to our terms and privacy policy
             </p>
           </div>
         </div>
