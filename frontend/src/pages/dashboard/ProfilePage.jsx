@@ -4,7 +4,6 @@ import { authService } from '../../services/authService'
 import { useMutation } from '@tanstack/react-query'
 import { User, Mail, Shield, Flame, Trophy, Save } from 'lucide-react'
 import toast from 'react-hot-toast'
-import PageHeader from '../../components/common/PageHeader'
 import Spinner from '../../components/common/Spinner'
 
 export default function ProfilePage() {
@@ -53,116 +52,163 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-2xl">
-      <PageHeader title="Profile" subtitle="Manage your account information" />
+    <div className="max-w-3xl mx-auto space-y-8 pb-12 animate-fade-in font-sans selection:bg-lime-400 selection:text-black text-zinc-300">
+      
+      {/* Header */}
+      <div>
+        <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-2">Profile Settings</h1>
+        <p className="text-zinc-400">Manage your account information and security preferences.</p>
+      </div>
 
       {/* Avatar + stats */}
-      <div className="card p-6 flex items-center gap-5 mb-6">
-        <div className="w-16 h-16 bg-gradient-to-br from-brand-500 to-brand-700 rounded-2xl
-                        flex items-center justify-center text-white font-display font-700 text-2xl shadow-glow flex-shrink-0">
-          {user?.username?.[0]?.toUpperCase()}
+      <div className="bg-[#111111] border border-zinc-800 p-8 rounded-2xl flex flex-col sm:flex-row items-center sm:items-start gap-6 shadow-xl relative overflow-hidden">
+        {/* Subtle background glow */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-lime-400/5 rounded-full blur-[80px] pointer-events-none" />
+        
+        <div className="w-20 h-20 bg-lime-400 rounded-2xl flex items-center justify-center text-[#0a0a0a] font-display font-bold text-3xl shadow-[0_0_20px_-5px_rgba(163,230,53,0.4)] flex-shrink-0 relative z-10">
+          {user?.username?.[0]?.toUpperCase() || 'U'}
         </div>
-        <div className="flex-1 min-w-0">
-          <h2 className="font-display text-lg font-700 text-slate-900">{user?.username}</h2>
-          <p className="text-slate-400 text-sm truncate">{user?.email}</p>
+        
+        <div className="flex-1 min-w-0 text-center sm:text-left relative z-10">
+          <h2 className="font-display text-2xl font-bold text-white mb-1">{user?.username || 'User'}</h2>
+          <p className="text-zinc-400 text-sm truncate">{user?.email}</p>
         </div>
-        <div className="flex gap-4">
+        
+        <div className="flex gap-6 sm:gap-8 mt-4 sm:mt-0 relative z-10 bg-[#0a0a0a] px-6 py-4 rounded-xl border border-zinc-800">
           <div className="text-center">
-            <p className="font-display font-700 text-xl text-slate-900 flex items-center gap-1">
-              <Trophy className="w-4.5 h-4.5 text-amber-400" />{user?.total_points || 0}
+            <p className="font-display font-bold text-2xl text-white flex items-center justify-center gap-1.5 mb-1">
+              <Trophy className="w-5 h-5 text-lime-400" />{user?.total_points || 0}
             </p>
-            <p className="text-xs text-slate-400">Points</p>
+            <p className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Points</p>
           </div>
+          <div className="w-px bg-zinc-800"></div>
           <div className="text-center">
-            <p className="font-display font-700 text-xl text-slate-900 flex items-center gap-1">
-              <Flame className="w-4.5 h-4.5 text-orange-400" />{user?.streak_days || 0}d
+            <p className="font-display font-bold text-2xl text-white flex items-center justify-center gap-1.5 mb-1">
+              <Flame className="w-5 h-5 text-orange-500" />{user?.streak_days || 0}
             </p>
-            <p className="text-xs text-slate-400">Streak</p>
+            <p className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Day Streak</p>
           </div>
         </div>
       </div>
 
-      {/* Profile form */}
-      <div className="card p-6 mb-6">
-        <h3 className="font-display font-600 text-slate-800 flex items-center gap-2 mb-5">
-          <User className="w-4.5 h-4.5 text-brand-500" /> Personal Information
-        </h3>
-        <form onSubmit={handleUpdate} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            {[
-              { name: 'first_name', label: 'First Name' },
-              { name: 'last_name',  label: 'Last Name' },
-            ].map(({ name, label }) => (
-              <div key={name}>
-                <label className="label">{label}</label>
+      <div className="grid md:grid-cols-5 gap-8">
+        {/* Left Column: Personal Info */}
+        <div className="md:col-span-3 space-y-6">
+          <div className="bg-[#111111] border border-zinc-800 p-8 rounded-2xl shadow-lg">
+            <h3 className="font-display font-semibold text-lg text-white flex items-center gap-2.5 mb-6 pb-4 border-b border-zinc-800/50">
+              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+                <User className="w-4 h-4 text-lime-400" />
+              </div>
+              Personal Information
+            </h3>
+            
+            <form onSubmit={handleUpdate} className="space-y-5">
+              <div className="grid grid-cols-2 gap-5">
+                {[
+                  { name: 'first_name', label: 'First Name' },
+                  { name: 'last_name',  label: 'Last Name' },
+                ].map(({ name, label }) => (
+                  <div key={name}>
+                    <label className="block text-sm font-medium text-zinc-400 mb-2">{label}</label>
+                    <input
+                      type="text" value={form[name]}
+                      onChange={(e) => setForm({ ...form, [name]: e.target.value })}
+                      className="w-full px-4 py-3 rounded-lg bg-[#0a0a0a] border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-colors"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-2">Username</label>
                 <input
-                  type="text" value={form[name]}
-                  onChange={(e) => setForm({ ...form, [name]: e.target.value })}
-                  className="input"
+                  type="text" value={form.username}
+                  onChange={(e) => setForm({ ...form, username: e.target.value })}
+                  className="w-full px-4 py-3 rounded-lg bg-[#0a0a0a] border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-colors"
                 />
               </div>
-            ))}
-          </div>
-          <div>
-            <label className="label">Username</label>
-            <input
-              type="text" value={form.username}
-              onChange={(e) => setForm({ ...form, username: e.target.value })}
-              className="input"
-            />
-          </div>
-          <div>
-            <label className="label">Email</label>
-            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-50 border border-slate-200">
-              <Mail className="w-4 h-4 text-slate-400" />
-              <span className="text-sm text-slate-500">{user?.email}</span>
-              <span className="ml-auto badge badge-brand text-xs">Cannot change</span>
-            </div>
-          </div>
-          <div>
-            <label className="label">Bio</label>
-            <textarea
-              value={form.bio} rows={3}
-              onChange={(e) => setForm({ ...form, bio: e.target.value })}
-              placeholder="Tell us about yourself…"
-              className="input resize-none"
-            />
-          </div>
-          <button type="submit" disabled={updateMut.isPending} className="btn-primary">
-            {updateMut.isPending ? <Spinner size="sm" /> : <><Save className="w-4 h-4" /> Save Changes</>}
-          </button>
-        </form>
-      </div>
 
-      {/* Password form */}
-      <div className="card p-6">
-        <h3 className="font-display font-600 text-slate-800 flex items-center gap-2 mb-5">
-          <Shield className="w-4.5 h-4.5 text-brand-500" /> Change Password
-        </h3>
-        <form onSubmit={handlePw} className="space-y-4">
-          {[
-            { name: 'old_password', label: 'Current Password' },
-            { name: 'new_password', label: 'New Password' },
-            { name: 'new_password_confirm', label: 'Confirm New Password' },
-          ].map(({ name, label }) => (
-            <div key={name}>
-              <label className="label">{label}</label>
-              <input
-                type="password" value={pwForm[name]}
-                onChange={(e) => setPwForm({ ...pwForm, [name]: e.target.value })}
-                className={`input ${pwErrors[name] ? 'input-error' : ''}`}
-              />
-              {pwErrors[name] && (
-                <p className="text-xs text-danger-500 mt-1">
-                  {Array.isArray(pwErrors[name]) ? pwErrors[name][0] : pwErrors[name]}
-                </p>
-              )}
-            </div>
-          ))}
-          <button type="submit" disabled={pwMut.isPending} className="btn-secondary">
-            {pwMut.isPending ? <Spinner size="sm" /> : <><Shield className="w-4 h-4" /> Update Password</>}
-          </button>
-        </form>
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-2">Email Address</label>
+                <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                  <Mail className="w-4.5 h-4.5 text-zinc-500" />
+                  <span className="text-sm text-zinc-500">{user?.email}</span>
+                  <span className="ml-auto px-2.5 py-1 bg-zinc-800 text-zinc-400 text-[10px] font-bold uppercase tracking-wider rounded">Cannot change</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-2">Bio</label>
+                <textarea
+                  value={form.bio} rows={4}
+                  onChange={(e) => setForm({ ...form, bio: e.target.value })}
+                  placeholder="Tell us about your learning goals..."
+                  className="w-full px-4 py-3 rounded-lg bg-[#0a0a0a] border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-colors resize-none"
+                />
+              </div>
+
+              <div className="pt-2">
+                <button 
+                  type="submit" 
+                  disabled={updateMut.isPending} 
+                  className="w-full sm:w-auto px-6 py-3.5 bg-lime-400 hover:bg-lime-500 text-[#0a0a0a] font-bold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-70"
+                >
+                  {updateMut.isPending ? <Spinner size="sm" color="text-[#0a0a0a]" /> : <><Save className="w-4.5 h-4.5" /> Save Changes</>}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        {/* Right Column: Security */}
+        <div className="md:col-span-2 space-y-6">
+          <div className="bg-[#111111] border border-zinc-800 p-8 rounded-2xl shadow-lg">
+            <h3 className="font-display font-semibold text-lg text-white flex items-center gap-2.5 mb-6 pb-4 border-b border-zinc-800/50">
+              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+                <Shield className="w-4 h-4 text-lime-400" />
+              </div>
+              Security
+            </h3>
+            
+            <form onSubmit={handlePw} className="space-y-5">
+              {[
+                { name: 'old_password', label: 'Current Password', placeholder: '••••••••' },
+                { name: 'new_password', label: 'New Password', placeholder: '••••••••' },
+                { name: 'new_password_confirm', label: 'Confirm New Password', placeholder: '••••••••' },
+              ].map(({ name, label, placeholder }) => (
+                <div key={name}>
+                  <label className="block text-sm font-medium text-zinc-400 mb-2">{label}</label>
+                  <input
+                    type="password" 
+                    value={pwForm[name]}
+                    placeholder={placeholder}
+                    onChange={(e) => setPwForm({ ...pwForm, [name]: e.target.value })}
+                    className={`w-full px-4 py-3 rounded-lg bg-[#0a0a0a] text-white placeholder-zinc-600 focus:outline-none transition-colors border ${
+                      pwErrors[name] 
+                        ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500' 
+                        : 'border-zinc-800 focus:border-lime-400 focus:ring-1 focus:ring-lime-400'
+                    }`}
+                  />
+                  {pwErrors[name] && (
+                    <p className="text-xs font-medium text-red-500 mt-1.5">
+                      {Array.isArray(pwErrors[name]) ? pwErrors[name][0] : pwErrors[name]}
+                    </p>
+                  )}
+                </div>
+              ))}
+              
+              <div className="pt-2">
+                <button 
+                  type="submit" 
+                  disabled={pwMut.isPending} 
+                  className="w-full px-6 py-3.5 bg-[#0a0a0a] text-white border border-zinc-800 hover:border-lime-400/50 hover:text-lime-400 font-bold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-70"
+                >
+                  {pwMut.isPending ? <Spinner size="sm" color="text-lime-400" /> : <><Shield className="w-4.5 h-4.5" /> Update Password</>}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   )

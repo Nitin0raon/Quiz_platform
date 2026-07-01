@@ -14,35 +14,34 @@ import {
   Cell,
 } from 'recharts'
 import { TrendingUp, Award, Users, Target } from 'lucide-react'
-import PageHeader from '../../components/common/PageHeader'
-import SkeletonCard from '../../components/common/SkeletonCard'
 
-const COLORS = ['#6366f1', '#818cf8', '#a5b4fc', '#c7d2fe', '#e0e7ff']
+// Updated palette for dark mode (Lime / Green spectrum)
+const COLORS = ['#a3e635', '#bef264', '#d9f99d', '#ecfccb', '#84cc16']
 
 function CustomTooltip({ active, payload, label }) {
   if (active && payload?.length) {
     return (
-      <div className="bg-white border border-slate-100 rounded-xl shadow-card p-3 text-xs">
-        <p className="text-slate-500 mb-1">{label}</p>
-
+      <div className="bg-[#111111] border border-zinc-800 rounded-lg shadow-2xl p-4 text-xs font-sans min-w-[120px]">
+        <p className="text-zinc-400 mb-3 font-semibold tracking-wide uppercase">{label}</p>
         {payload.map((p) => (
           <p
             key={p.name}
-            className="font-semibold"
+            className="font-bold flex items-center justify-between gap-4 text-sm"
             style={{ color: p.color }}
           >
-            {p.name}:{' '}
-            {typeof p.value === 'number'
-              ? `${Math.round(p.value)}${
-                  p.name.includes('ccuracy') ? '%' : ''
-                }`
-              : p.value}
+            <span>{p.name}:</span>
+            <span className="text-white">
+              {typeof p.value === 'number'
+                ? `${Math.round(p.value)}${
+                    p.name.toLowerCase().includes('accuracy') ? '%' : ''
+                  }`
+                : p.value}
+            </span>
           </p>
         ))}
       </div>
     )
   }
-
   return null
 }
 
@@ -88,83 +87,93 @@ export default function AnalyticsPage() {
       icon: Target,
       label: 'Avg. Accuracy',
       value: `${summary.average_accuracy || 0}%`,
-      color: 'text-brand-600 bg-brand-50',
+      color: 'text-lime-400 bg-lime-400/10 border-lime-400/20',
     },
     {
       icon: TrendingUp,
       label: 'Best Accuracy',
       value: `${summary.best_accuracy || 0}%`,
-      color: 'text-green-600 bg-green-50',
+      color: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20',
     },
     {
       icon: Award,
       label: 'Total Points',
       value: summary.total_points_earned || 0,
-      color: 'text-amber-600 bg-amber-50',
+      color: 'text-amber-400 bg-amber-400/10 border-amber-400/20',
     },
     {
       icon: Users,
       label: 'Quizzes Taken',
       value: summary.total_quizzes_taken || 0,
-      color: 'text-purple-600 bg-purple-50',
+      color: 'text-purple-400 bg-purple-400/10 border-purple-400/20',
     },
   ]
 
   return (
-    <div>
-      <PageHeader
-        title="Analytics"
-        subtitle="Track your performance and progress over time"
-      />
-{/* Summary Cards */}
-<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
-  {dLoading
-    ? [...Array(4)].map((_, i) => (
-        <SkeletonCard key={i} lines={2} />
-      ))
-    : statCards.map(({ icon: Icon, label, value, color }) => (
-        <div
-          key={label}
-          className="card p-6 flex items-center gap-5 border border-slate-100 hover:border-slate-200 hover:shadow-xl transition-all duration-300"
-        >
-          <div
-            className={`p-4 rounded-2xl flex items-center justify-center ${color}`}
-          >
-            <Icon className="w-6 h-6" />
-          </div>
+    <div className="max-w-7xl mx-auto space-y-8 pb-12 animate-fade-in font-sans selection:bg-lime-400 selection:text-black text-zinc-300">
+      
+      {/* Header */}
+      <div>
+        <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-2">Analytics Overview</h1>
+        <p className="text-zinc-400">Track your performance and progress over time.</p>
+      </div>
 
-          <div className="min-w-0">
-            <h3 className="text-3xl lg:text-4xl font-black tracking-tight text-slate-900 leading-none">
-              {value}
-            </h3>
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+        {dLoading
+          ? [...Array(4)].map((_, i) => (
+              <div key={i} className="bg-[#111111] border border-zinc-800 p-6 rounded-2xl h-32 animate-pulse flex items-center gap-5">
+                 <div className="w-14 h-14 bg-zinc-900 rounded-xl flex-shrink-0"></div>
+                 <div className="flex-1 space-y-3">
+                   <div className="h-6 bg-zinc-900 rounded w-1/2"></div>
+                   <div className="h-4 bg-zinc-900 rounded w-3/4"></div>
+                 </div>
+              </div>
+            ))
+          : statCards.map(({ icon: Icon, label, value, color }) => (
+              <div
+                key={label}
+                className="bg-[#111111] p-6 rounded-2xl border border-zinc-800 flex items-center gap-5 hover:border-lime-400/30 transition-all duration-300 shadow-lg group relative overflow-hidden"
+              >
+                {/* Subtle hover glow */}
+                <div className="absolute inset-0 bg-lime-400/0 group-hover:bg-lime-400/[0.02] transition-colors pointer-events-none" />
+                
+                <div className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 border ${color}`}>
+                  <Icon className="w-6 h-6" />
+                </div>
 
-            <p className="mt-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
-              {label}
-            </p>
-          </div>
-        </div>
-      ))}
-</div>
+                <div className="min-w-0 relative z-10">
+                  <h3 className="text-3xl font-display font-bold text-white leading-none mb-1.5">
+                    {value}
+                  </h3>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                    {label}
+                  </p>
+                </div>
+              </div>
+            ))}
+      </div>
 
       {/* Charts */}
-      <div className="grid xl:grid-cols-2 gap-6">
-
+      <div className="grid xl:grid-cols-2 gap-8">
+        
         {/* Accuracy Trend */}
-        <div className="card p-6">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="section-title text-lg">
-              Accuracy Trend
-            </h2>
+        <div className="bg-[#111111] border border-zinc-800 p-6 sm:p-8 rounded-2xl shadow-lg flex flex-col">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+            <div>
+              <h2 className="font-display font-semibold text-lg text-white">Accuracy Trend</h2>
+              <p className="text-xs text-zinc-500 mt-1">Your performance over selected days</p>
+            </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 p-1 bg-[#0a0a0a] border border-zinc-800 rounded-lg self-start">
               {[7, 30, 90].map((d) => (
                 <button
                   key={d}
                   onClick={() => setDays(d)}
-                  className={`px-3 py-1.5 rounded-lg text-sm transition ${
+                  className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-colors ${
                     days === d
-                      ? 'bg-brand-600 text-white'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      ? 'bg-lime-400 text-[#0a0a0a] shadow-sm'
+                      : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
                   }`}
                 >
                   {d}d
@@ -173,130 +182,108 @@ export default function AnalyticsPage() {
             </div>
           </div>
 
-          {aLoading ? (
-            <div className="shimmer h-72 rounded-xl" />
-          ) : accuracyData.length === 0 ? (
-            <div className="h-72 flex items-center justify-center text-slate-400 text-sm">
-              No data available for this period.
-            </div>
-          ) : (
-            <ResponsiveContainer width="100%" height={280}>
-              <AreaChart data={accuracyData}>
-                <defs>
-                  <linearGradient
-                    id="accGrad"
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop
-                      offset="5%"
-                      stopColor="#6366f1"
-                      stopOpacity={0.15}
-                    />
-                    <stop
-                      offset="95%"
-                      stopColor="#6366f1"
-                      stopOpacity={0}
-                    />
-                  </linearGradient>
-                </defs>
+          <div className="flex-1 min-h-[300px]">
+            {aLoading ? (
+              <div className="w-full h-full animate-pulse bg-zinc-900/50 rounded-xl" />
+            ) : accuracyData.length === 0 ? (
+              <div className="h-full flex items-center justify-center text-zinc-500 text-sm border border-zinc-800 border-dashed rounded-xl">
+                No data available for this period.
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={accuracyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="accGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#a3e635" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#a3e635" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
 
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="#f1f5f9"
-                />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
 
-                <XAxis
-                  dataKey="date"
-                  tick={{ fontSize: 11, fill: '#94a3b8' }}
-                  tickLine={false}
-                />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 11, fill: '#71717a' }}
+                    tickLine={false}
+                    axisLine={false}
+                    dy={10}
+                  />
 
-                <YAxis
-                  domain={[0, 100]}
-                  unit="%"
-                  tick={{ fontSize: 11, fill: '#94a3b8' }}
-                  tickLine={false}
-                  axisLine={false}
-                />
+                  <YAxis
+                    domain={[0, 100]}
+                    unit="%"
+                    tick={{ fontSize: 11, fill: '#71717a' }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
 
-                <Tooltip content={<CustomTooltip />} />
+                  <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#3f3f46', strokeWidth: 1, strokeDasharray: '4 4' }} />
 
-                <Area
-                  type="monotone"
-                  dataKey="accuracy"
-                  name="Accuracy"
-                  stroke="#6366f1"
-                  strokeWidth={3}
-                  fill="url(#accGrad)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          )}
+                  <Area
+                    type="monotone"
+                    dataKey="accuracy"
+                    name="Accuracy"
+                    stroke="#a3e635"
+                    strokeWidth={3}
+                    fill="url(#accGrad)"
+                    activeDot={{ r: 6, fill: '#a3e635', stroke: '#111111', strokeWidth: 3 }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
+          </div>
         </div>
 
         {/* Topic Performance */}
-        <div className="card p-6">
-          <h2 className="section-title text-lg mb-5">
-            Topic Performance
-          </h2>
+        <div className="bg-[#111111] border border-zinc-800 p-6 sm:p-8 rounded-2xl shadow-lg flex flex-col">
+          <div className="mb-8">
+            <h2 className="font-display font-semibold text-lg text-white">Topic Performance</h2>
+            <p className="text-xs text-zinc-500 mt-1">Accuracy breakdown by subject</p>
+          </div>
 
-          {dLoading ? (
-            <div className="shimmer h-72 rounded-xl" />
-          ) : topicData.length === 0 ? (
-            <div className="h-72 flex items-center justify-center text-slate-400 text-sm">
-              Take quizzes to view topic-wise performance.
-            </div>
-          ) : (
-            <ResponsiveContainer width="100%" height={280}>
-              <BarChart
-                data={topicData}
-                layout="vertical"
-              >
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="#f1f5f9"
-                  horizontal={false}
-                />
+          <div className="flex-1 min-h-[300px]">
+            {dLoading ? (
+              <div className="w-full h-full animate-pulse bg-zinc-900/50 rounded-xl" />
+            ) : topicData.length === 0 ? (
+              <div className="h-full flex items-center justify-center text-zinc-500 text-sm border border-zinc-800 border-dashed rounded-xl">
+                Take quizzes to view topic-wise performance.
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={topicData} layout="vertical" margin={{ top: 0, right: 10, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#27272a" horizontal={false} />
 
-                <XAxis
-                  type="number"
-                  domain={[0, 100]}
-                  unit="%"
-                  tick={{ fontSize: 11, fill: '#94a3b8' }}
-                  tickLine={false}
-                  axisLine={false}
-                />
+                  <XAxis
+                    type="number"
+                    domain={[0, 100]}
+                    unit="%"
+                    tick={{ fontSize: 11, fill: '#71717a' }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
 
-                <YAxis
-                  type="category"
-                  dataKey="name"
-                  width={110}
-                  tick={{ fontSize: 11, fill: '#64748b' }}
-                  tickLine={false}
-                  axisLine={false}
-                />
+                  <YAxis
+                    type="category"
+                    dataKey="name"
+                    width={100}
+                    tick={{ fontSize: 12, fill: '#a1a1aa', fontWeight: 500 }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
 
-                <Tooltip content={<CustomTooltip />} />
+                  <Tooltip content={<CustomTooltip />} cursor={{ fill: '#27272a', opacity: 0.4 }} />
 
-                <Bar
-                  dataKey="accuracy"
-                  name="Accuracy"
-                  radius={[0, 8, 8, 0]}
-                >
-                  {topicData.map((_, index) => (
-                    <Cell
-                      key={index}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          )}
+                  <Bar dataKey="accuracy" name="Accuracy" radius={[0, 6, 6, 0]} barSize={24}>
+                    {topicData.map((_, index) => (
+                      <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
         </div>
+
       </div>
     </div>
   )
