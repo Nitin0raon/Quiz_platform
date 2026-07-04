@@ -182,7 +182,7 @@ export default function HomePage() {
       <div className="grid lg:grid-cols-5 gap-6">
 
         {/* Recent attempts */}
-        <div className="lg:col-span-3 bg-[#14161B] border border-[#24272E] rounded-2xl p-6 flex flex-col">
+        {/* <div className="lg:col-span-3 bg-[#14161B] border border-[#24272E] rounded-2xl p-6 flex flex-col">
           <div className="flex items-center justify-between mb-6">
             <p className="f-display font-semibold text-base text-[#ECEAE6]">Recent attempts</p>
             <Link to="/quizzes/attempts"
@@ -234,13 +234,13 @@ export default function HomePage() {
               })}
             </div>
           )}
-        </div>
+        </div> */}
 
         {/* Right col */}
         <div className="lg:col-span-2 space-y-6 flex flex-col">
 
           {/* Topic performance */}
-          <div className="bg-[#14161B] border border-[#24272E] rounded-2xl p-6">
+          {/* <div className="bg-[#14161B] border border-[#24272E] rounded-2xl p-6">
             <div className="flex items-center justify-between mb-6">
               <p className="f-display font-semibold text-base text-[#ECEAE6]">Topic performance</p>
               <Link to="/analytics"
@@ -270,7 +270,7 @@ export default function HomePage() {
                 ))}
               </div>
             )}
-          </div>
+          </div> */}
 
           {/* Platform features */}
           <div className="bg-[#14161B] border border-[#24272E] rounded-2xl p-6 flex-1">
