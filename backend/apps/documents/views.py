@@ -44,30 +44,53 @@ class DocumentUploadView(APIView):
                 'errors': serializer.errors,
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        document = serializer.save()
+        try:
+            document = serializer.save()
+        except Exception as exc:
+            logger.exception("Document upload failed while saving the file")
+            return Response({
+                'success': False,
+                'message': 'Document upload failed while saving the file.',
+                'errors': {'file': [str(exc)]},
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         logger.info(f"Document uploaded: {document.id} by user: {request.user.email}")
 
         # Process the document (extract text, chunk, embed)
         # In production with Celery, this would be: process_document.delay(document.id)
         # For now, we process it immediately (synchronously)
-        pipeline_result = process_document_pipeline(document)
+        try:
+            pipeline_result = process_document_pipeline(document)
+        except Exception as exc:
+            logger.exception(f"Document processing pipeline crashed for {document.id}")
+            document.status = UploadedDocument.Status.FAILED
+            document.error_message = str(exc)
+            document.save(update_fields=['status', 'error_message'])
+            pipeline_result = {
+                'success': False,
+                'error': str(exc),
+                'stage': 'processing',
+            }
 
         if pipeline_result['success']:
             message = (
                 f"Document uploaded and processed successfully. "
-                f"Extracted {pipeline_result.get('page_count', 0)} pages, "
-                f"created {pipeline_result.get('chunks', 0)} chunks."
+                # f"Extracted {pipeline_result.get('page_count', 0)} pages, "
+                # f"created {pipeline_result.get('chunks', 0)} chunks."
             )
         else:
             stage = pipeline_result.get('stage', 'processing')
-            message = f"Document uploaded but processing failed at {stage} stage. Error: {pipeline_result.get('error')}"
+            message = (
+                f"Document uploaded successfully. Processing did not complete at the {stage} stage. "
+                f"You can retry later if needed. Error: {pipeline_result.get('error')}"
+            )
 
         # Refresh from DB to get updated status
         document.refresh_from_db()
 
         return Response({
             'success': True,
+            'processing_success': pipeline_result['success'],
             'message': message,
             'document': DocumentDetailSerializer(document).data,
         }, status=status.HTTP_201_CREATED)

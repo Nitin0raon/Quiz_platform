@@ -6,6 +6,15 @@ import { User, Mail, Shield, Flame, Trophy, Save } from 'lucide-react'
 import toast from 'react-hot-toast'
 import Spinner from '../../components/common/Spinner'
 
+const FONTS = (
+  <style>{`
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    .f-display { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
+    .f-body { font-family: 'Inter', sans-serif; }
+    .f-mono { font-family: 'JetBrains Mono', monospace; }
+  `}</style>
+)
+
 export default function ProfilePage() {
   const { user, refreshUser } = useAuth()
   const [form, setForm] = useState({
@@ -51,42 +60,48 @@ export default function ProfilePage() {
     pwMut.mutate(pwForm)
   }
 
+  const btnPrimary = "w-full sm:w-auto px-6 py-3.5 bg-[#F5B942] hover:bg-[#f0aa26] text-[#0A0B0D] font-semibold rounded-xl transition-all shadow-[0_0_15px_-3px_rgba(245,185,66,0.35)] flex items-center justify-center gap-2 disabled:opacity-70 f-body text-sm"
+  const btnSecondary = "w-full px-6 py-3.5 bg-[#0A0B0D] text-[#ECEAE6] border border-[#24272E] hover:border-[#F5B942]/50 hover:text-[#F5B942] font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-70 f-body text-sm"
+  const inputClass = "w-full px-4 py-3 rounded-xl bg-[#0A0B0D] border border-[#24272E] text-[#ECEAE6] f-body text-sm placeholder-[#4A4E56] focus:outline-none focus:border-[#F5B942]/60 focus:ring-1 focus:ring-[#F5B942]/20 transition-all"
+  const labelClass = "block text-[11px] font-semibold text-[#8B8F97] f-mono uppercase tracking-wider mb-2"
+
   return (
-    <div className="max-w-3xl mx-auto space-y-8 pb-12 animate-fade-in font-sans selection:bg-lime-400 selection:text-black text-zinc-300">
+    <div className="max-w-4xl mx-auto space-y-8 pb-12 animate-fade-in text-[#8B8F97] f-body selection:bg-[#F5B942] selection:text-[#0A0B0D]">
+      {FONTS}
       
       {/* Header */}
       <div>
-        <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-2">Profile Settings</h1>
-        <p className="text-zinc-400">Manage your account information and security preferences.</p>
+        <h1 className="text-2xl md:text-3xl f-display font-semibold text-[#ECEAE6] mb-2">Profile Settings</h1>
+        <p className="text-[#8B8F97] f-body">Manage your account information and security preferences.</p>
       </div>
 
       {/* Avatar + stats */}
-      <div className="bg-[#111111] border border-zinc-800 p-8 rounded-2xl flex flex-col sm:flex-row items-center sm:items-start gap-6 shadow-xl relative overflow-hidden">
+      <div className="bg-[#14161B] border border-[#24272E] p-8 rounded-2xl flex flex-col sm:flex-row items-center sm:items-start gap-6 shadow-lg shadow-black/20 relative overflow-hidden">
         {/* Subtle background glow */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-lime-400/5 rounded-full blur-[80px] pointer-events-none" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-[#F5B942]/5 rounded-full blur-[80px] pointer-events-none" />
         
-        <div className="w-20 h-20 bg-lime-400 rounded-2xl flex items-center justify-center text-[#0a0a0a] font-display font-bold text-3xl shadow-[0_0_20px_-5px_rgba(163,230,53,0.4)] flex-shrink-0 relative z-10">
+        <div className="w-20 h-20 bg-[#F5B942] rounded-2xl flex items-center justify-center text-[#0A0B0D] f-display font-bold text-3xl shadow-[0_0_20px_-5px_rgba(245,185,66,0.4)] flex-shrink-0 relative z-10">
           {user?.username?.[0]?.toUpperCase() || 'U'}
         </div>
         
         <div className="flex-1 min-w-0 text-center sm:text-left relative z-10">
-          <h2 className="font-display text-2xl font-bold text-white mb-1">{user?.username || 'User'}</h2>
-          <p className="text-zinc-400 text-sm truncate">{user?.email}</p>
+          <h2 className="f-display text-2xl font-semibold text-[#ECEAE6] mb-1">{user?.username || 'User'}</h2>
+          <p className="text-[#8B8F97] text-sm truncate f-mono">{user?.email}</p>
         </div>
         
-        <div className="flex gap-6 sm:gap-8 mt-4 sm:mt-0 relative z-10 bg-[#0a0a0a] px-6 py-4 rounded-xl border border-zinc-800">
+        <div className="flex gap-6 sm:gap-8 mt-4 sm:mt-0 relative z-10 bg-[#0A0B0D] px-6 py-4 rounded-xl border border-[#24272E]">
           <div className="text-center">
-            <p className="font-display font-bold text-2xl text-white flex items-center justify-center gap-1.5 mb-1">
-              <Trophy className="w-5 h-5 text-lime-400" />{user?.total_points || 0}
+            <p className="f-display font-bold text-2xl text-[#ECEAE6] flex items-center justify-center gap-1.5 mb-1">
+              <Trophy className="w-5 h-5 text-[#F5B942]" />{user?.total_points || 0}
             </p>
-            <p className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Points</p>
+            <p className="text-[10px] text-[#8B8F97] uppercase tracking-wider font-semibold f-mono">Points</p>
           </div>
-          <div className="w-px bg-zinc-800"></div>
+          <div className="w-px bg-[#24272E]"></div>
           <div className="text-center">
-            <p className="font-display font-bold text-2xl text-white flex items-center justify-center gap-1.5 mb-1">
-              <Flame className="w-5 h-5 text-orange-500" />{user?.streak_days || 0}
+            <p className="f-display font-bold text-2xl text-[#ECEAE6] flex items-center justify-center gap-1.5 mb-1">
+              <Flame className="w-5 h-5 text-rose-400" />{user?.streak_days || 0}
             </p>
-            <p className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Day Streak</p>
+            <p className="text-[10px] text-[#8B8F97] uppercase tracking-wider font-semibold f-mono">Day Streak</p>
           </div>
         </div>
       </div>
@@ -94,10 +109,10 @@ export default function ProfilePage() {
       <div className="grid md:grid-cols-5 gap-8">
         {/* Left Column: Personal Info */}
         <div className="md:col-span-3 space-y-6">
-          <div className="bg-[#111111] border border-zinc-800 p-8 rounded-2xl shadow-lg">
-            <h3 className="font-display font-semibold text-lg text-white flex items-center gap-2.5 mb-6 pb-4 border-b border-zinc-800/50">
-              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center">
-                <User className="w-4 h-4 text-lime-400" />
+          <div className="bg-[#14161B] border border-[#24272E] p-8 rounded-2xl shadow-lg shadow-black/10">
+            <h3 className="f-display font-semibold text-lg text-[#ECEAE6] flex items-center gap-3 mb-6 pb-4 border-b border-[#24272E]/70">
+              <div className="w-8 h-8 rounded-lg bg-[#0A0B0D] border border-[#24272E] flex items-center justify-center shadow-inner">
+                <User className="w-4 h-4 text-[#F5B942]" />
               </div>
               Personal Information
             </h3>
@@ -109,41 +124,41 @@ export default function ProfilePage() {
                   { name: 'last_name',  label: 'Last Name' },
                 ].map(({ name, label }) => (
                   <div key={name}>
-                    <label className="block text-sm font-medium text-zinc-400 mb-2">{label}</label>
+                    <label className={labelClass}>{label}</label>
                     <input
                       type="text" value={form[name]}
                       onChange={(e) => setForm({ ...form, [name]: e.target.value })}
-                      className="w-full px-4 py-3 rounded-lg bg-[#0a0a0a] border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-colors"
+                      className={inputClass}
                     />
                   </div>
                 ))}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-zinc-400 mb-2">Username</label>
+                <label className={labelClass}>Username</label>
                 <input
                   type="text" value={form.username}
                   onChange={(e) => setForm({ ...form, username: e.target.value })}
-                  className="w-full px-4 py-3 rounded-lg bg-[#0a0a0a] border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-colors"
+                  className={inputClass}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-zinc-400 mb-2">Email Address</label>
-                <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-zinc-900/50 border border-zinc-800">
-                  <Mail className="w-4.5 h-4.5 text-zinc-500" />
-                  <span className="text-sm text-zinc-500">{user?.email}</span>
-                  <span className="ml-auto px-2.5 py-1 bg-zinc-800 text-zinc-400 text-[10px] font-bold uppercase tracking-wider rounded">Cannot change</span>
+                <label className={labelClass}>Email Address</label>
+                <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#24272E]/30 border border-[#24272E]">
+                  <Mail className="w-4.5 h-4.5 text-[#4A4E56]" />
+                  <span className="text-sm text-[#8B8F97] f-body">{user?.email}</span>
+                  <span className="ml-auto px-2.5 py-1 bg-[#24272E] text-[#8B8F97] text-[10px] font-bold uppercase tracking-wider rounded f-mono">Cannot change</span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-zinc-400 mb-2">Bio</label>
+                <label className={labelClass}>Bio</label>
                 <textarea
                   value={form.bio} rows={4}
                   onChange={(e) => setForm({ ...form, bio: e.target.value })}
                   placeholder="Tell us about your learning goals..."
-                  className="w-full px-4 py-3 rounded-lg bg-[#0a0a0a] border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-colors resize-none"
+                  className={`${inputClass} resize-none`}
                 />
               </div>
 
@@ -151,9 +166,9 @@ export default function ProfilePage() {
                 <button 
                   type="submit" 
                   disabled={updateMut.isPending} 
-                  className="w-full sm:w-auto px-6 py-3.5 bg-lime-400 hover:bg-lime-500 text-[#0a0a0a] font-bold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-70"
+                  className={btnPrimary}
                 >
-                  {updateMut.isPending ? <Spinner size="sm" color="text-[#0a0a0a]" /> : <><Save className="w-4.5 h-4.5" /> Save Changes</>}
+                  {updateMut.isPending ? <Spinner size="sm" color="text-[#0A0B0D]" /> : <><Save className="w-4.5 h-4.5" /> Save Changes</>}
                 </button>
               </div>
             </form>
@@ -162,10 +177,10 @@ export default function ProfilePage() {
 
         {/* Right Column: Security */}
         <div className="md:col-span-2 space-y-6">
-          <div className="bg-[#111111] border border-zinc-800 p-8 rounded-2xl shadow-lg">
-            <h3 className="font-display font-semibold text-lg text-white flex items-center gap-2.5 mb-6 pb-4 border-b border-zinc-800/50">
-              <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center">
-                <Shield className="w-4 h-4 text-lime-400" />
+          <div className="bg-[#14161B] border border-[#24272E] p-8 rounded-2xl shadow-lg shadow-black/10">
+            <h3 className="f-display font-semibold text-lg text-[#ECEAE6] flex items-center gap-3 mb-6 pb-4 border-b border-[#24272E]/70">
+              <div className="w-8 h-8 rounded-lg bg-[#0A0B0D] border border-[#24272E] flex items-center justify-center shadow-inner">
+                <Shield className="w-4 h-4 text-[#F5B942]" />
               </div>
               Security
             </h3>
@@ -177,20 +192,20 @@ export default function ProfilePage() {
                 { name: 'new_password_confirm', label: 'Confirm New Password', placeholder: '••••••••' },
               ].map(({ name, label, placeholder }) => (
                 <div key={name}>
-                  <label className="block text-sm font-medium text-zinc-400 mb-2">{label}</label>
+                  <label className={labelClass}>{label}</label>
                   <input
                     type="password" 
                     value={pwForm[name]}
                     placeholder={placeholder}
                     onChange={(e) => setPwForm({ ...pwForm, [name]: e.target.value })}
-                    className={`w-full px-4 py-3 rounded-lg bg-[#0a0a0a] text-white placeholder-zinc-600 focus:outline-none transition-colors border ${
+                    className={`w-full px-4 py-3 rounded-xl bg-[#0A0B0D] text-[#ECEAE6] f-body text-sm placeholder-[#4A4E56] focus:outline-none transition-all border ${
                       pwErrors[name] 
-                        ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500' 
-                        : 'border-zinc-800 focus:border-lime-400 focus:ring-1 focus:ring-lime-400'
+                        ? 'border-rose-400/50 focus:border-rose-400 focus:ring-1 focus:ring-rose-400/20' 
+                        : 'border-[#24272E] focus:border-[#F5B942]/60 focus:ring-1 focus:ring-[#F5B942]/20'
                     }`}
                   />
                   {pwErrors[name] && (
-                    <p className="text-xs font-medium text-red-500 mt-1.5">
+                    <p className="text-xs f-body text-rose-400 mt-1.5">
                       {Array.isArray(pwErrors[name]) ? pwErrors[name][0] : pwErrors[name]}
                     </p>
                   )}
@@ -201,9 +216,9 @@ export default function ProfilePage() {
                 <button 
                   type="submit" 
                   disabled={pwMut.isPending} 
-                  className="w-full px-6 py-3.5 bg-[#0a0a0a] text-white border border-zinc-800 hover:border-lime-400/50 hover:text-lime-400 font-bold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-70"
+                  className={btnSecondary}
                 >
-                  {pwMut.isPending ? <Spinner size="sm" color="text-lime-400" /> : <><Shield className="w-4.5 h-4.5" /> Update Password</>}
+                  {pwMut.isPending ? <Spinner size="sm" color="text-[#F5B942]" /> : <><Shield className="w-4.5 h-4.5" /> Update Password</>}
                 </button>
               </div>
             </form>

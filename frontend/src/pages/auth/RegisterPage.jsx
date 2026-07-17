@@ -1,8 +1,17 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { Brain, Eye, EyeOff, ArrowRight, Check } from 'lucide-react'
+import { Brain, Eye, EyeOff, ArrowRight } from 'lucide-react'
 import Spinner from '../../components/common/Spinner'
+
+const FONTS = (
+  <style>{`
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    .f-display { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
+    .f-body { font-family: 'Inter', sans-serif; }
+    .f-mono { font-family: 'JetBrains Mono', monospace; }
+  `}</style>
+)
 
 function Field({
   name,
@@ -16,30 +25,34 @@ function Field({
   showPw,
   setShowPw,
 }) {
+  const isPassword = name === 'password' || name === 'password_confirm'
+
   return (
     <div className={half ? '' : 'col-span-2'}>
-      <label className="label">{label}</label>
+      <label className="block text-xs font-semibold uppercase tracking-wider text-[#8B8F97] f-mono mb-2">
+        {label}
+      </label>
 
       <div className="relative">
         <input
-          type={name.includes('password') && !showPw ? 'password' : type}
+          type={isPassword && !showPw ? 'password' : (type === 'password' ? 'text' : type)}
           name={name}
           value={form[name]}
           onChange={handleChange}
           placeholder={placeholder}
           autoComplete="off"
-          className={`input ${errors[name] ? 'input-error' : ''} ${
-            name === 'password' || name === 'password_confirm'
-              ? 'pr-12'
-              : ''
-          }`}
+          className={`w-full bg-[#0A0B0D] text-[#ECEAE6] border f-body text-sm px-4 py-3 rounded-xl transition-all outline-none placeholder-[#4A4E56] ${
+            errors[name] 
+              ? 'border-rose-400/50 focus:border-rose-400 focus:ring-1 focus:ring-rose-400/20' 
+              : 'border-[#24272E] focus:border-[#F5B942]/60 focus:ring-1 focus:ring-[#F5B942]/20'
+          } ${isPassword ? 'pr-12' : ''}`}
         />
 
-        {name === 'password' && (
+        {isPassword && (
           <button
             type="button"
             onClick={() => setShowPw(!showPw)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#4A4E56] hover:text-[#ECEAE6] transition-colors"
           >
             {showPw ? (
               <EyeOff className="w-4.5 h-4.5" />
@@ -51,7 +64,7 @@ function Field({
       </div>
 
       {errors[name] && (
-        <p className="text-xs text-danger-500 mt-1">
+        <p className="text-xs text-rose-400 mt-1.5 f-body">
           {errors[name]}
         </p>
       )}
@@ -128,148 +141,153 @@ export default function RegisterPage() {
     }
   }
 
+  const btnPrimary = "w-full py-3 rounded-xl bg-[#F5B942] hover:bg-[#f0aa26] text-[#0A0B0D] f-body font-semibold text-sm transition-all shadow-[0_0_15px_-3px_rgba(245,185,66,0.35)] flex items-center justify-center gap-2 mt-6 disabled:opacity-70 disabled:pointer-events-none"
+  const btnGhost = "flex items-center gap-2 px-4 py-2 bg-[#14161B]/80 backdrop-blur-md border border-[#24272E] rounded-xl hover:border-[#F5B942]/40 transition-colors text-[#8B8F97] hover:text-[#ECEAE6] text-sm font-medium shadow-md shadow-black/20"
+
   return (
-  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-brand-50 px-4 py-10 relative overflow-hidden">
-    {/* Background Effects */}
-    <div className="absolute inset-0 overflow-hidden">
-      <div className="absolute top-0 left-0 w-96 h-96 bg-brand-200 rounded-full blur-3xl opacity-30" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-indigo-200 rounded-full blur-3xl opacity-30" />
-    </div>
+    <div className="min-h-screen flex items-center justify-center bg-[#0A0B0D] px-4 py-12 relative overflow-hidden text-[#8B8F97] f-body selection:bg-[#F5B942] selection:text-[#0A0B0D]">
+      {FONTS}
 
-    {/* Home Button */}
-    <div className="absolute top-6 left-6 z-20">
-      <Link
-        to="/LandingPage"
-        className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-md border border-slate-200 rounded-xl shadow-md hover:shadow-lg hover:bg-white transition-all duration-200 text-slate-700 font-medium"
-      >
-        Home
-      </Link>
-    </div>
+      {/* Decorative Blur Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-[#F5B942]/5 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-indigo-500/[0.03] rounded-full blur-[120px]" />
+      </div>
 
-    {/* Register Card */}
-    <div className="relative z-10 w-full max-w-2xl">
-      <div className="bg-white/80 backdrop-blur-xl border border-white shadow-2xl rounded-3xl p-8 md:p-10">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-brand-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg mb-4">
-            <Brain className="w-8 h-8 text-white" />
+      {/* Home Button */}
+      <div className="absolute top-6 left-6 z-20">
+        <Link to="/LandingPage" className={btnGhost}>
+          Home
+        </Link>
+      </div>
+
+      {/* Register Card */}
+      <div className="relative z-10 w-full max-w-2xl animate-fade-in">
+        <div className="bg-[#14161B] border border-[#24272E] shadow-2xl shadow-black/40 rounded-2xl p-8 md:p-10">
+          
+          {/* Logo / Header */}
+          <div className="text-center mb-8">
+            <div className="w-14 h-14 bg-[#0A0B0D] border border-[#24272E] rounded-xl flex items-center justify-center mx-auto shadow-inner mb-4">
+              <Brain className="w-7 h-7 text-[#F5B942]" />
+            </div>
+
+            <h1 className="f-display text-2xl md:text-3xl font-semibold text-[#ECEAE6] mb-2">
+              Create Account
+            </h1>
+
+            <p className="text-[#8B8F97] text-sm f-body">
+              Start your AI-powered learning journey
+            </p>
+
+            <p className="text-sm text-[#4A4E56] mt-3 f-body">
+              Already have an account?{' '}
+              <Link
+                to="/login"
+                className="text-[#F5B942] font-semibold hover:text-[#f0aa26] transition-colors ml-1"
+              >
+                Sign In
+              </Link>
+            </p>
           </div>
 
-          <h1 className="text-3xl font-bold text-slate-900">
-            Create Account
-          </h1>
+          {/* Form Content */}
+          <form onSubmit={handleSubmit}>
+            <div className="grid md:grid-cols-2 gap-5">
+              <Field
+                name="first_name"
+                label="First Name"
+                placeholder="John"
+                half
+                form={form}
+                errors={errors}
+                handleChange={handleChange}
+                showPw={showPw}
+                setShowPw={setShowPw}
+              />
 
-          <p className="text-slate-500 mt-2">
-            Start your AI-powered learning journey
-          </p>
+              <Field
+                name="last_name"
+                label="Last Name"
+                placeholder="Doe"
+                half
+                form={form}
+                errors={errors}
+                handleChange={handleChange}
+                showPw={showPw}
+                setShowPw={setShowPw}
+              />
 
-          <p className="text-sm text-slate-500 mt-3">
-            Already have an account?{' '}
-            <Link
-              to="/login"
-              className="text-brand-600 font-semibold hover:text-brand-700"
+              <Field
+                name="username"
+                label="Username"
+                placeholder="johndoe"
+                form={form}
+                errors={errors}
+                handleChange={handleChange}
+                showPw={showPw}
+                setShowPw={setShowPw}
+              />
+
+              <Field
+                name="email"
+                label="Email Address"
+                type="email"
+                placeholder="john@example.com"
+                form={form}
+                errors={errors}
+                handleChange={handleChange}
+                showPw={showPw}
+                setShowPw={setShowPw}
+              />
+
+              <Field
+                name="password"
+                label="Password"
+                type="password"
+                placeholder="Minimum 8 characters"
+                form={form}
+                errors={errors}
+                handleChange={handleChange}
+                showPw={showPw}
+                setShowPw={setShowPw}
+              />
+
+              <Field
+                name="password_confirm"
+                label="Confirm Password"
+                type="password"
+                placeholder="Re-enter password"
+                form={form}
+                errors={errors}
+                handleChange={handleChange}
+                showPw={showPw}
+                setShowPw={setShowPw}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className={btnPrimary}
             >
-              Sign In
-            </Link>
+              {loading ? (
+                <Spinner size="sm" />
+              ) : (
+                <>
+                  Create Account
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Terms Footer */}
+          <p className="text-center text-[11px] text-[#4A4E56] f-mono uppercase tracking-wider mt-6">
+            By creating an account, you agree to our Terms of Service and
+            Privacy Policy.
           </p>
         </div>
-
-        <form onSubmit={handleSubmit}>
-          <div className="grid md:grid-cols-2 gap-5">
-            <Field
-              name="first_name"
-              label="First Name"
-              placeholder="John"
-              half
-              form={form}
-              errors={errors}
-              handleChange={handleChange}
-              showPw={showPw}
-              setShowPw={setShowPw}
-            />
-
-            <Field
-              name="last_name"
-              label="Last Name"
-              placeholder="Doe"
-              half
-              form={form}
-              errors={errors}
-              handleChange={handleChange}
-              showPw={showPw}
-              setShowPw={setShowPw}
-            />
-
-            <Field
-              name="username"
-              label="Username"
-              placeholder="johndoe"
-              form={form}
-              errors={errors}
-              handleChange={handleChange}
-              showPw={showPw}
-              setShowPw={setShowPw}
-            />
-
-            <Field
-              name="email"
-              label="Email Address"
-              type="email"
-              placeholder="john@example.com"
-              form={form}
-              errors={errors}
-              handleChange={handleChange}
-              showPw={showPw}
-              setShowPw={setShowPw}
-            />
-
-            <Field
-              name="password"
-              label="Password"
-              type="password"
-              placeholder="Minimum 8 characters"
-              form={form}
-              errors={errors}
-              handleChange={handleChange}
-              showPw={showPw}
-              setShowPw={setShowPw}
-            />
-
-            <Field
-              name="password_confirm"
-              label="Confirm Password"
-              type="password"
-              placeholder="Re-enter password"
-              form={form}
-              errors={errors}
-              handleChange={handleChange}
-              showPw={showPw}
-              setShowPw={setShowPw}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold transition flex items-center justify-center gap-2 shadow-lg mt-6"
-          >
-            {loading ? (
-              <Spinner size="sm" />
-            ) : (
-              <>
-                Create Account
-                <ArrowRight className="w-4 h-4" />
-              </>
-            )}
-          </button>
-        </form>
-
-        <p className="text-center text-xs text-slate-400 mt-6">
-          By creating an account, you agree to our Terms of Service and
-          Privacy Policy.
-        </p>
       </div>
     </div>
-  </div>
-)
+  )
 }

@@ -18,7 +18,7 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000'
 const api = axios.create({
   baseURL: `${BASE_URL}/api/v1`,
   headers: { 'Content-Type': 'application/json' },
-  timeout: 30000, // 30 second timeout
+  timeout: 600000, // 10 minute timeout for long-running uploads and processing
 })
 
 // ── REQUEST INTERCEPTOR ──────────────────────────────────────

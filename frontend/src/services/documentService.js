@@ -7,6 +7,7 @@ export const documentService = {
     api.post('/documents/upload/', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
       onUploadProgress,
+      timeout: 1200000, // 20 minutes for very large PDFs
     }),
 
   get: (id) => api.get(`/documents/${id}/`),
