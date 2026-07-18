@@ -39,7 +39,7 @@ logger = logging.getLogger('apps.rag')
 
 class EmbeddingService:
     """
-    Generates text embeddings using HuggingFace Sentence Transformers.
+    Generates text embeddings using the Jina embeddings API.
 
     An embedding converts text to a vector (list of numbers).
     Example: "Hello world" -> [0.1, 0.5, -0.3, 0.8, ...]
@@ -47,17 +47,43 @@ class EmbeddingService:
     """
 
     def __init__(self):
-        self._model = None
+        self.api_key = os.getenv('JINA_API_KEY') or getattr(settings, 'JINA_API_KEY', None)
+        self.model_name = os.getenv('JINA_EMBEDDING_MODEL', 'jina-embeddings-v3')
+        self.base_url = os.getenv('JINA_EMBEDDINGS_URL', 'https://api.jina.ai/v1/embeddings')
 
-    def _get_model(self):
-        """Lazy-load the embedding model."""
-        if self._model is None:
-            from langchain_huggingface import HuggingFaceEmbeddings
+    def _generate_embeddings(self, texts: list[str]) -> list[list[float]]:
+        if not texts:
+            return []
 
-            self._model = HuggingFaceEmbeddings(
-                model_name="sentence-transformers/all-MiniLM-L6-v2"
-            )
-        return self._model
+        if not self.api_key:
+            raise RuntimeError('JINA_API_KEY is not configured.')
+
+        response = requests.post(
+            self.base_url,
+            headers={
+                'Authorization': f'Bearer {self.api_key}',
+                'Content-Type': 'application/json',
+            },
+            json={
+                'input': texts,
+                'model': self.model_name,
+            },
+            timeout=60,
+        )
+        response.raise_for_status()
+
+        payload = response.json()
+        embeddings = []
+        for item in payload.get('data', []):
+            embedding = item.get('embedding')
+            if embedding is None:
+                raise ValueError('Jina API returned an embedding payload without vector data.')
+            embeddings.append(embedding)
+
+        if len(embeddings) != len(texts):
+            raise ValueError('Jina API returned an unexpected number of embeddings.')
+
+        return embeddings
 
     def embed_texts(self, texts: list[str]) -> list[list[float]]:
         """
@@ -69,12 +95,8 @@ class EmbeddingService:
         Returns:
             List of embedding vectors (each is a list of floats)
         """
-        if not texts:
-            return []
-
         try:
-            model = self._get_model()
-            embeddings = model.embed_documents(texts)
+            embeddings = self._generate_embeddings(list(texts))
             logger.info(f"Generated {len(embeddings)} embeddings")
             return embeddings
         except Exception as e:
@@ -87,9 +109,8 @@ class EmbeddingService:
         Used for similarity search.
         """
         try:
-            model = self._get_model()
-            embedding = model.embed_query(query)
-            return embedding
+            embeddings = self._generate_embeddings([query])
+            return embeddings[0]
         except Exception as e:
             logger.error(f"Query embedding failed: {e}")
             raise
