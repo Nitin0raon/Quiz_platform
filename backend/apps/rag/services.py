@@ -136,6 +136,19 @@ class FAISSService:
     def _get_index_path(self, index_id: str) -> Path:
         return self.index_base_path / index_id
 
+    def _normalize_vectors(self, vectors: np.ndarray) -> np.ndarray:
+        """Normalize vectors to unit length for cosine similarity search."""
+        norms = np.linalg.norm(vectors, axis=1, keepdims=True)
+        norms[norms == 0] = 1.0
+        return vectors / norms
+
+    def _normalize_query_vector(self, vector: np.ndarray) -> np.ndarray:
+        """Normalize a single query vector to unit length."""
+        norm = np.linalg.norm(vector)
+        if norm == 0:
+            return vector
+        return vector / norm
+
     def index_document(self, document) -> dict:
         """
         Generate embeddings for all chunks of a document and store in FAISS.
@@ -170,10 +183,12 @@ class FAISSService:
             embedding_matrix = np.array(embeddings, dtype='float32')
             dimension = embedding_matrix.shape[1]
 
+            # Normalize embeddings for cosine similarity search
+            embedding_matrix = self._normalize_vectors(embedding_matrix)
+
             # Create FAISS index
-            # IndexFlatL2: Exact search using L2 (Euclidean) distance
-            # For larger datasets, use IndexIVFFlat (approximate but faster)
-            faiss_index = faiss.IndexFlatL2(dimension)
+            # IndexFlatIP: Inner product search on normalized vectors equals cosine similarity
+            faiss_index = faiss.IndexFlatIP(dimension)
             faiss_index.add(embedding_matrix)
 
             # Create metadata: maps vector index to chunk info
@@ -276,22 +291,23 @@ class FAISSService:
             with open(metadata_file, 'rb') as f:
                 metadata = pickle.load(f)
 
-            # Embed the query
+            # Embed and normalize the query
             query_embedding = self.embedding_service.embed_query(query)
             query_vector = np.array([query_embedding], dtype='float32')
+            query_vector = np.array([self._normalize_query_vector(query_vector[0])], dtype='float32')
 
-            # Search: returns distances and indices of top_k most similar vectors
-            distances, indices = faiss_index.search(query_vector, top_k)
+            # Search: returns similarity scores and indices of top_k most similar vectors
+            similarities, indices = faiss_index.search(query_vector, top_k)
 
             results = []
-            for i, (dist, idx) in enumerate(zip(distances[0], indices[0])):
+            for i, (sim, idx) in enumerate(zip(similarities[0], indices[0])):
                 if idx == -1:  # FAISS returns -1 for missing results
                     continue
                 chunk_meta = metadata.get(int(idx), {})
                 results.append({
                     'rank': i + 1,
-                    'score': float(1 / (1 + dist)),  # Convert distance to similarity score
-                    'distance': float(dist),
+                    'score': float(sim),
+                    'similarity': float(sim),
                     **chunk_meta
                 })
 
