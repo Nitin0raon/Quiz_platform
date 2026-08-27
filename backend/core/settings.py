@@ -400,7 +400,9 @@ MAX_DOCUMENT_SIZE_MB = 10
 # GROQ API (replaces Gemini for quiz generation)
 # ============================================================
 GROQ_API_KEY = os.getenv('GROQ_API_KEY', '')
-GROQ_MODEL = os.getenv('GROQ_MODEL', 'llama-3.1-8b-instant')
+GROQ_MODEL = os.getenv('GROQ_MODEL', 'openai/gpt-oss-120b').strip()
+if GROQ_MODEL in {'llama-3.3-70b-versatile', 'llama-3.1-8b-instant'}:
+    GROQ_MODEL = 'openai/gpt-oss-120b'
 
 
 # ============================================================

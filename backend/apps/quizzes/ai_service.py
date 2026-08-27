@@ -411,7 +411,7 @@ class GeminiQuizService:
             client = self._get_client()
 
             response = client.chat.completions.create(
-                model=getattr(settings, 'GROQ_MODEL', 'llama-3.1-8b-instant'),
+                model=getattr(settings, 'GROQ_MODEL', 'openai/gpt-oss-120b'),
                 messages=[
                     {
                         "role": "system",
